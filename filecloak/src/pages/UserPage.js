@@ -4,7 +4,6 @@ import { getAuth, signOut } from 'firebase/auth'; // Firebase auth functions
 import FileCloak from '../FileCloak.webp';
 import './UserPage.css';
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -26,6 +25,9 @@ function AdminPageDecrypt() {
   const [keyInput, setKeyInput] = useState('');
   const [tokenInput, setTokenInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [decryptedURL, setDecryptedURL] = useState('');
+  const [decryptedNote, setDecryptedNote] = useState('');
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
