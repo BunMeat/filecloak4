@@ -89,14 +89,13 @@ function AdminPageDecrypt() {
   };
 
   const logOut = async () => {
-    try {
-      await auth.signOut();
-      alert('Logged out successfully.');
+    signOut(auth)
+    .then(() => {
       navigate('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      alert('Error logging out.');
-    }
+    })
+    .catch((error) => {
+      setError('Failed to log out: ' + error.message);
+    });
   };
 
   const exportToTxt = (decryptedURL, decryptedNote) => {
