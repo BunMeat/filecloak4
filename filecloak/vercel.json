@@ -1,30 +1,23 @@
 {
-    "version": 2,
-    "builds": [
-      {
-        "src": "api/index.mjs",
-        "use": "@vercel/node"
-      },
-      {
-        "src": "src/index.mjs",
-        "use": "@vercel/static-build",
-        "config": {
-          "distDir": "build"
-        }
-      }
-    ],
-    "routes": [
-      {
-        "src": "api/(.*)",
-        "dest": "api/routes/$1"
-      },
-      {
-        "handle": "filesystem"
-      },
-      {
-        "src": "/(.*)",
-        "dest": "src/index.mjs"
-      }
-    ]
-  }
-  
+  "version": 2,
+  "builds": [
+    {
+      "src": "index.mjs",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "webpack.config.js",
+      "use": "@vercel/static-build"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/routes/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.mjs"
+    }
+  ]
+}
