@@ -1,0 +1,125 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+.decrypt-body{
+    height: 100%;
+    background-color: #BED8D4;
+    overflow: hidden;
+}
+
+.decrypt-container, .decrypt-form {
+    width: 80%;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+    height: 580px;
+}
+
+.decrypt-logo{
+    width: 200px;
+    margin-bottom: 20px;
+}
+
+.decrypt-panel {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.file-decryption {
+    background: #f8f8f8;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.header2 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.admin-key-input, .admin-token-input{
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.logoutButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.logout-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #f44336;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.encrypt-btn, .decrypt-btn, .list-btn{
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.encrypt-btn {
+    background-color: #4CAF50;
+}
+
+.decrypt-btn {
+    background-color: #f44336;
+}
+
+.list-btn {
+    background-color: #454343;
+}
+
+.logout {
+    background-color: #ff1100;
+    width: auto;
+    padding: 10px 20px;
+}
+
+.encrypt-btn:hover, .decrypt-btn:hover, .list-btn:hover {
+    opacity: 0.8;
+}
+
+.encrypt-btn:focus, .decrypt-btn:focus, .list-btn:focus {
+    outline: none;
+}
+
+#fileDecryption {
+    width: 450px;
+    margin: 0 auto;
+}
+
+
+@media (max-width: 768px) {
+    .panel {
+        grid-template-columns: 1fr;
+    }
+}

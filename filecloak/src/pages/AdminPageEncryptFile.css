@@ -1,0 +1,152 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+.encrypt-file-body {
+    height: 100%;
+    background-color: #BED8D4;
+    overflow: hidden;
+}
+
+.encrypt-file-container {
+    width: 80%;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+}
+
+.encrypt-file-logo {
+    width: 200px;
+    margin-bottom: 20px;
+}
+
+.encrypt-file-panel {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.file-encryption {
+    background: #f8f8f8;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.logout-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #f44336;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.header2 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+
+.file-input-div {
+    display: flex;
+    align-items: center; /* Align items vertically centered */
+    margin-bottom: 20px;
+    position: relative;
+  }
+  
+.drop-area {
+    flex: 3; /* Larger proportion to take up more space */
+    border: 2px dashed #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 20px; /* Add some padding for better visual appearance */
+    background-color: rgba(255, 255, 255, 0.7); /* Optional: To make the drop area slightly translucent */
+}
+
+.zip-checkbox-container {
+    flex: 1; /* Smaller proportion */
+    margin-left: 10px; /* Add some spacing between drop-area and checkbox */
+}
+
+.file-input {
+    position: absolute; /* Make it absolute to overlay the entire container */
+    opacity: 0; /* Hide the file input */
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 1;
+}
+  
+.encrypt-text-btn, .encrypt-btn, .decrypt-btn, .list-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.encrypt-btn {
+    background-color: #4CAF50;
+}
+
+.decrypt-btn {
+    background-color: #f44336;
+}
+
+.encrypt-text-btn {
+    background-color: dimgray;
+}
+
+.list-btn {
+    background-color: #454343;
+}
+
+.counter-tracker {
+    font-size: 10px;
+}
+
+.button:hover {
+    opacity: 0.8;
+}
+
+button:focus {
+    outline: none;
+}
+
+/* .drop-area {
+    border: 2px dashed #cccccc;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+} */
+
+.drop-area.dragging {
+    background-color: #f1f1f1;
+}
+
+
+@media (max-width: 768px) {
+    .panel {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,118 @@
+.list-body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #BED8D4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+.list-container {
+    width: 80%;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+  }
+  
+.button-row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+.left-buttons,
+.right-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+.encrypt-btn, .decrypt-btn, .logout-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .encrypt-btn {
+    background-color: #4CAF50;
+  }
+  
+  .decrypt-btn {
+    background-color: #f44336;
+  }
+  
+  .logout-btn {
+    background-color: #ff1100;
+    width: auto;
+    padding: 10px 20px;
+  }
+  
+  .list-logo {
+    width: 200px;
+    margin-bottom: 20px;
+  }
+  
+.list-ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+.list-li {
+    padding: 10px;
+    border-bottom: 7px solid #302f2f;
+    word-wrap: break-word;
+    word-break: break-all;
+  }
+  
+.list-li:hover{
+    display: block;
+    background-color: rgb(165, 163, 163);
+    transition: background-color 0.3s;
+  }
+  
+.list-li:last-child {
+    border-bottom: none;
+  }
+  
+.list-panel {
+    width: 100%;
+    display: grid;
+    align-items: center;
+  }
+  
+  h1 {
+    margin-bottom: 15px;
+    color: #333;
+    text-align: center;
+  }
+  
+  @media (max-width: 768px) {
+    .panel {
+      grid-template-columns: 1fr;
+    }
+    .button-row {
+      flex-direction: column;
+      align-items: center;
+    }
+    .left-buttons,
+    .right-buttons {
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      align-items: center;
+    }
+  }
+  

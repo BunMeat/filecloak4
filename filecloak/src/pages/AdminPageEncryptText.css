@@ -1,0 +1,112 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+.encrypt-text-body{
+    height: 100%;
+    background-color: #BED8D4;
+    overflow: hidden;
+}
+
+.encrypt-text-container {
+    width: 80%;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+}
+
+.encrypt-text-logo {
+    width: 200px;
+    margin-bottom: 20px;
+}
+
+.encrypt-text-panel {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.file-encryption{
+    background: #f8f8f8;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.logoutButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.header2 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.file-output {
+    border: 2px dashed #ccc;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+
+.encrypt-file-btn, .encrypt-btn, .decrypt-btn, .list-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.encrypt-btn {
+    background-color: #4CAF50;
+}
+
+.decrypt-btn {
+    background-color: #f44336;
+}
+
+.encrypt-file-btn {
+    background-color:dimgray ;
+}
+
+.list-btn {
+    background-color: #454343;
+}
+
+.logout {
+    background-color: #ff1100;
+    width: auto;
+    padding: 10px 20px;
+}
+
+.button:hover {
+    opacity: 0.8;
+}
+
+button:focus {
+    outline: none;
+}
+
+@media (max-width: 768px) {
+    .panel {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,79 @@
+.login-body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to top, #8fd3f4, #84fab0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.login-container {
+    background-color: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 430px;
+}
+
+.login-logo {
+    width: 200px;
+    margin-bottom: 20px;
+    position: relative;
+    margin-top: -170px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+}
+
+.login-input-group {
+    margin-bottom: 20px;
+    position: relative;
+    width: 100%;
+}
+
+.login-email, .login-password {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding-left: 20px; 
+    position: relative;
+}
+
+.login-input-group::placeholder {
+    color: #aaa;
+}
+
+.login-submit-btn {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.signup-btn-in-login {
+    background-color: transparent;
+    color: #333;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.login-submit-btn:hover {
+    opacity: 0.8;
+}
+
+.signup-btn-in-login:hover {
+    opacity: 0.8;
+}
