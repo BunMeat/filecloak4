@@ -16,7 +16,7 @@ class MainApp extends React.Component {
   }
 
   callApi() {
-    fetch("http://localhost:4000/api/testApi")
+    fetch("https://filecloak.vercel.app/api/testApi")
       .then(res => res.text())
       .then(res => this.setState({ apiResponse: res }))
       .catch(err => console.error(err));

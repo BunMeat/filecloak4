@@ -19,7 +19,7 @@ function SignUp() {
 
     try {
       console.log("5")
-      const response = await fetch('http://localhost:4000/api/signup', {
+      const response = await fetch('https://filecloak.vercel.app/api/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

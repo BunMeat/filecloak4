@@ -36,7 +36,7 @@ function DataList() {
     // Fetch data from your backend API
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:4000/api/datalist');
+        const response = await fetch('https://filecloak.vercel.app/api/datalist');
         const result = await response.json();
         setData(result);
       } catch (error) {
