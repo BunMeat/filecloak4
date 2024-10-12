@@ -4,7 +4,6 @@ import { getAuth, signOut } from 'firebase/auth'; // Firebase auth functions
 import FileCloak from '../FileCloak.webp';
 import './AdminPageDecrypt.css';
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
 
 // Firebase configuration
 const firebaseConfig = {

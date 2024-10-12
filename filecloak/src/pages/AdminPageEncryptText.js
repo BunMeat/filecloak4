@@ -24,7 +24,6 @@ function AdminPageEncryptText() {
   const [key, setKey] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const [encryptedLinks, setEncryptedLinks] = useState([]);
 
   // On component mount, check if the user is authenticated
   useEffect(() => {

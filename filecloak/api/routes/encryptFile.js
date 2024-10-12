@@ -9,7 +9,6 @@ const router = express.Router();
 const upload = multer();
 const { initializeApp } = require('firebase/app');
 const { getFirestore, collection, doc, setDoc } = require('firebase/firestore');
-const { getStorage, ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 
 const firebaseAdminCredentials = {
   type: process.env.TYPE,

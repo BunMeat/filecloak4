@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const JSZip = require('jszip');
 const CryptoJS = require('crypto-js');
 const router = express.Router();
 const { initializeApp } = require('firebase/app');
