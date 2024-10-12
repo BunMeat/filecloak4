@@ -2,7 +2,7 @@
   "name": "api",
   "version": "0.0.0",
   "private": true,
-  "main": "index.mjs",
+  "main": "app.js",
   "scripts": {
     "start": "node api",
     "dev": "nodemon api"
