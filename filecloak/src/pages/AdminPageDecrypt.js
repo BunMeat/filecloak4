@@ -18,7 +18,6 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
-const db = getFirestore(firebaseApp);
 
 function AdminPageDecrypt() {
   const navigate = useNavigate();
@@ -29,7 +28,6 @@ function AdminPageDecrypt() {
   const [decryptedURL, setDecryptedURL] = useState('');
   const [decryptedNote, setDecryptedNote] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
