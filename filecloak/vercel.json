@@ -2,28 +2,28 @@
     "version": 2,
     "builds": [
       {
-        "src": "filecloak/api/index.mjs",
+        "src": "api/index.mjs",
         "use": "@vercel/node"
       },
       {
-        "src": "filecloak/src/index.mjs",
+        "src": "src/index.mjs",
         "use": "@vercel/static-build",
         "config": {
-          "distDir": "filecloak/build"
+          "distDir": "build"
         }
       }
     ],
     "routes": [
       {
-        "src": "/api/(.*)",
-        "dest": "/api/routes/$1"
+        "src": "api/(.*)",
+        "dest": "api/routes/$1"
       },
       {
         "handle": "filesystem"
       },
       {
         "src": "/(.*)",
-        "dest": "/filecloak/src/index.mjs"
+        "dest": "src/index.mjs"
       }
     ]
   }
