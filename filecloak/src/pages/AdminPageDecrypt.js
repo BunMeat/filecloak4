@@ -27,6 +27,7 @@ function AdminPageDecrypt() {
   const [decryptedURL, setDecryptedURL] = useState('');
   const [decryptedNote, setDecryptedNote] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
