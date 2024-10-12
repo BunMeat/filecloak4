@@ -16,7 +16,7 @@
     "routes": [
       {
         "src": "/api/(.*)",
-        "dest": "/api/index.mjs"
+        "dest": "/filecloak/api/index.mjs"
       },
       {
         "handle": "filesystem"
