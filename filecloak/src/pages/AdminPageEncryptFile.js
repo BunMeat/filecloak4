@@ -97,7 +97,7 @@ function AdminPageEncryptFile() {
           formData.append(`note_${index}`, note); // Append each note with a unique key
         });
   
-        const response = await fetch('http://localhost:4000/encryptfile', {
+        const response = await fetch('http://localhost:4000/api/encryptfile', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${idToken}`, // Include ID token in the Authorization header

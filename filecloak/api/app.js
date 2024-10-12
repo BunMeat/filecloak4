@@ -27,14 +27,14 @@ app.use(cors({
 }));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/testApi', testApi);
-app.use('/signup', signupRouter);
-app.use('/login', loginRouter);
-app.use('/encryptfile', encryptFileRouter);
-app.use('/encrypttext', encryptTextRouter);
-app.use('/decrypt', decryptRouter);
-app.use('/datalist', dataListRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/testApi', testApi);
+app.use('/api/signup', signupRouter);
+app.use('/api/login', loginRouter);
+app.use('/api/encryptfile', encryptFileRouter);
+app.use('/api/encrypttext', encryptTextRouter);
+app.use('/api/decrypt', decryptRouter);
+app.use('/api/datalist', dataListRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

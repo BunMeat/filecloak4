@@ -62,7 +62,7 @@ function AdminPageEncryptText() {
       if (user) {
         const idToken = await user.getIdToken(); // Get the ID token for auth
       
-        const response = await fetch('http://localhost:4000/encrypttext', {
+        const response = await fetch('http://localhost:4000/api/encrypttext', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -61,7 +61,7 @@ function AdminPageDecrypt() {
       if (user) {
         const idToken = await user.getIdToken(); // Get the Firebase ID token
 
-        const response = await fetch('http://localhost:4000/decrypt', {
+        const response = await fetch('http://localhost:4000/api/decrypt', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
