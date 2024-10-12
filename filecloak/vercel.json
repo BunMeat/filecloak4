@@ -6,7 +6,7 @@
         "use": "@vercel/node"
       },
       {
-        "src": "filecloak/src/**/*",
+        "src": "filecloak/src/index.mjs",
         "use": "@vercel/static-build",
         "config": {
           "distDir": "filecloak/build"
@@ -23,7 +23,7 @@
       },
       {
         "src": "/(.*)",
-        "dest": "/filecloak/build/index.html"
+        "dest": "/filecloak/src/index.mjs"
       }
     ]
   }
