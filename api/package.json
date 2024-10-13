@@ -4,8 +4,8 @@
   "private": true,
   "main": "index.mjs",
   "scripts": {
-    "start": "node api",
-    "dev": "nodemon api"
+    "start": "node index.mjs",
+    "dev": "nodemon index.mjs"
   },
   "dependencies": {
     "@firebase/app": "^0.10.12",
