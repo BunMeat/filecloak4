@@ -1,9 +1,9 @@
 require('dotenv').config();
-const express = require('express');
-const router = express.Router();
-const { initializeApp } = require('firebase/app');
-const { getAuth, signInWithEmailAndPassword } = require('firebase/auth');
-const { getFirestore, doc, getDoc, updateDoc } = require('firebase/firestore');
+var express = require('express');
+var router = express.Router();
+var { initializeApp } = require('firebase/app');
+var { getAuth, signInWithEmailAndPassword } = require('firebase/auth');
+var { getFirestore, doc, getDoc, updateDoc } = require('firebase/firestore');
 
 // Firebase Configuration
 const firebaseConfig = {

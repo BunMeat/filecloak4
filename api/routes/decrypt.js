@@ -1,10 +1,10 @@
 require('dotenv').config();
-const express = require('express');
-const CryptoJS = require('crypto-js');
-const router = express.Router();
-const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, getDocs } = require('firebase/firestore');
-const firebaseAdmin = require('firebase-admin');
+var express = require('express');
+var CryptoJS = require('crypto-js');
+var router = express.Router();
+var { initializeApp } = require('firebase/app');
+var { getFirestore, collection, getDocs } = require('firebase/firestore');
+var firebaseAdmin = require('firebase-admin');
 
 // Firebase Configuration
 const firebaseConfig = {

@@ -1,7 +1,7 @@
 require('dotenv').config();
-const express = require('express');
-const CryptoJS = require('crypto-js');
-const router = express.Router();
+var express = require('express');
+var CryptoJS = require('crypto-js');
+var router = express.Router();
 
 // Encrypt function
 function encrypt(text, key) {

@@ -1,14 +1,14 @@
 // Import necessary modules
 require('dotenv').config();
-const express = require('express');
-const multer = require('multer');
-const firebaseAdmin = require('firebase-admin');
-const JSZip = require('jszip');
-const CryptoJS = require('crypto-js');
-const router = express.Router();
-const upload = multer();
-const { initializeApp } = require('firebase/app');
-const { getFirestore, collection, doc, setDoc } = require('firebase/firestore');
+var express = require('express');
+var multer = require('multer');
+var firebaseAdmin = require('firebase-admin');
+var JSZip = require('jszip');
+var CryptoJS = require('crypto-js');
+var router = express.Router();
+var upload = multer();
+var { initializeApp } = require('firebase/app');
+var { getFirestore, collection, doc, setDoc } = require('firebase/firestore');
 
 const firebaseAdminCredentials = {
   type: process.env.TYPE,
