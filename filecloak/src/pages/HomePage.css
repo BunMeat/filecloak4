@@ -7,7 +7,7 @@
 
 .homepage-body{
   max-width: auto;
-  height: 630px;
+  height: 100vh;
   background: linear-gradient(135deg, #E0F7FA 0%, #80DEEA 100%);
   display: flex;
   justify-content: center;

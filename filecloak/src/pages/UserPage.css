@@ -6,7 +6,7 @@
 }
 
 .userpage-body {
-    height: 630px;
+    height: 100vh;
     background-color: #BED8D4;
     overflow: hidden;
 }
