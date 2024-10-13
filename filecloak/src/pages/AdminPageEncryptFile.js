@@ -97,7 +97,7 @@ function AdminPageEncryptFile() {
           formData.append(`note_${index}`, note); // Append each note with a unique key
         });
   
-        const response = await fetch('https://filecloak.vercel.app/api/encryptfile', {
+        const response = await fetch('https://filecloak4.vercel.app/api/encryptfile', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${idToken}`, // Include ID token in the Authorization header
