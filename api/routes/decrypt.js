@@ -85,8 +85,6 @@ router.post('/', async (req, res) => {
       }
     });
 
-    res.send("decrypt is active");
-
     if (foundFile) {
       const decryptedNote = decrypt(foundFile.encryptNote, keyInput);
       return res.status(200).json({ decryptedURL: foundFile.decryptUrl, decryptedNote });

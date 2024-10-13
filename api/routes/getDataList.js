@@ -34,7 +34,6 @@ router.get('/', async (req, res) => {
         });
       }
     }
-    res.send("getData is active");
     res.json(data);
   } catch (error) {
     console.error("Error fetching data:", error);
