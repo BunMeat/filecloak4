@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signOut } from 'firebase/auth'; // Import Firebase auth functions
+import { getAuth, signOut, setPersistence, browserLocalPersistence } from 'firebase/auth'; // Import Firebase auth functions
 import FileCloak from '../FileCloak.webp';
 import './AdminPageEncryptFile.css';
 import CryptoJS from 'crypto-js';
 import { initializeApp } from 'firebase/app';
+
 
 // Firebase configuration
 const firebaseConfig = {
@@ -30,19 +31,23 @@ function AdminPageEncryptFile() {
   const [fileNames, setFileNames] = useState(''); // State for displaying file names
   const [fileNotes, setFileNotes] = useState([]); // State to hold notes for each file
 
-  // On component mount, check if the user is authenticated
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        // User is authenticated
-      } else {
-        navigate('/login'); // Redirect to login if user is not authenticated
-      }
-    });
+    setPersistence(auth, browserLocalPersistence)
+      .then(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+          if (user) {
+            // User is authenticated
+          } else {
+            navigate('/login'); // Redirect to login if user is not authenticated
+          }
+        });
   
-    // Cleanup the subscription on component unmount
-    return () => unsubscribe();
-  }, [navigate]);
+        return () => unsubscribe(); // Cleanup the subscription on component unmount
+      })
+      .catch((error) => {
+        console.error('Error setting auth persistence:', error);
+      });
+  }, [navigate]);  
 
   const handleLogout = () => {
     signOut(auth)
