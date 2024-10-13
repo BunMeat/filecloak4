@@ -34,7 +34,7 @@ function AdminPageEncryptFile() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        console.log('User is authenticated:', user);
+        console.log("welcome")
       } else {
         console.log('No user authenticated, redirecting to login');
         navigate('/login');

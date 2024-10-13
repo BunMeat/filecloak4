@@ -33,6 +33,19 @@ function DataList() {
   };
 
   useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log("welcome")
+      } else {
+        console.log('No user authenticated, redirecting to login');
+        navigate('/login');
+      }
+    });
+  
+    return () => unsubscribe();
+  }, [navigate]);
+
+  useEffect(() => {
     // Fetch data from your backend API
     const fetchData = async () => {
       try {

@@ -29,13 +29,13 @@ function AdminPageEncryptText() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        // User is authenticated
+        console.log("welcome")
       } else {
-        navigate('/login'); // Redirect to login if user is not authenticated
+        console.log('No user authenticated, redirecting to login');
+        navigate('/login');
       }
     });
   
-    // Cleanup the subscription on component unmount
     return () => unsubscribe();
   }, [navigate]);
 

@@ -32,11 +32,13 @@ function AdminPageDecrypt() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
+        console.log("welcome")
       } else {
-        navigate('/login'); // Redirect to login if not authenticated
+        console.log('No user authenticated, redirecting to login');
+        navigate('/login');
       }
     });
-
+  
     return () => unsubscribe();
   }, [navigate]);
 
