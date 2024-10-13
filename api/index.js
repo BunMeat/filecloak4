@@ -23,9 +23,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({
-  origin: 'https://filecloak.vercel.app', // Allow requests from your React app
-  methods: ["POST", "GET"],
-  credentials: true
+  origin: 'https://filecloak.vercel.app'
 }));
 
 app.use('/', indexRouter);
