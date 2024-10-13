@@ -162,7 +162,7 @@ router.post('/', upload.array('files'), async (req, res) => {
 
     console.log("9");
 
-
+    res.send("encryptFile is active");
     res.status(200).json({ message: 'Files encrypted successfully.', encryptedLinks });
   } catch (error) {
     console.error('Error during encryption process:', error);

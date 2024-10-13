@@ -21,6 +21,7 @@ router.post('/', async (req, res) => {
 
   try {
     const encryptedText = encrypt(text, key);
+    res.send("encryptText is active");
     res.status(200).json({ encryptedText });
   } catch (error) {
     console.error('Encryption failed', error);

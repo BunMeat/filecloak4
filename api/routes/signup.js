@@ -46,6 +46,7 @@ router.post('/', async (req, res) => {
 
     await setDoc(userRefDoc, userData);
     res.status(201).json({ message: 'User registered successfully' });
+    res.send("signup is active");
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

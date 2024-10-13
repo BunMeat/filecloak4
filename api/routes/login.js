@@ -47,6 +47,7 @@ router.post('/', async (req, res) => {
     await updateDoc(userDocRef, { attemptNo: 0 });
 
     // Respond with the user role
+    res.send("login is active");
     return res.status(200).json({ message: 'Login successful', role: userData.role, token: idToken });
 
   } catch (error) {
