@@ -11,12 +11,14 @@ function SignUp() {
   };
 
   const handleSubmit = async (event) => {
+    console.log("4")
     event.preventDefault();
     const email = event.target.email.value;
     const password = event.target.password.value;
     const repeatPassword = event.target.repeatPassword.value;
 
     try {
+      console.log("5")
       const response = await fetch('https://filecloak4.vercel.app/api/signup', {
         method: 'POST',
         headers: {
@@ -26,13 +28,16 @@ function SignUp() {
       });
 
       if (response.ok) {
+        console.log("6")
         alert('User registered successfully. Please login.');
         handleNavigation('/login');
       } else {
+        console.log("7")
         const data = await response.json();
         alert(data.message);
       }
     } catch (error) {
+      console.log("8")
       console.error('Error:', error);
       alert('Server error. Please try again later.');
     }

@@ -62,11 +62,12 @@ function convertToWIB(isoString) {
 // Verify ID token using Firebase Admin SDK
 async function verifyIdToken(idToken) {
   try {
-    
+    console.log("a");
     const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
-
+    console.log("b");
     return decodedToken; // Returns user data if successful
   } catch (error) {
+    console.log("c");
     throw new Error('ID token verification failed');
   }
 }
@@ -100,28 +101,33 @@ const adminStorage = firebaseAdmin.storage().bucket(); // This uses the Admin SD
 // Handle file upload and encryption
 router.post('/', upload.array('files'), async (req, res) => {
   try {
+    console.log("1");
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ message: 'Authorization header is malformed' });
     }
+    console.log("2");
 
     const idToken = authHeader.split('Bearer ')[1];
     const userData = await verifyIdToken(idToken);
     const userId = userData.uid;
 
+    console.log("3");
 
     const files = req.files;
     const { key, note, zipFiles } = req.body;
     const encryptedLinks = [];
     const zip = new JSZip();
 
+    console.log("4");
 
     if (!files || !key) {
       return res.status(400).json({ message: 'No files or encryption key provided.' });
     }
 
     if (zipFiles === 'true') {
+      console.log("5");
       for (const file of files) {
         zip.file(file.originalname, file.buffer);
       }
@@ -135,6 +141,7 @@ router.post('/', upload.array('files'), async (req, res) => {
       const encryptedLink = encrypt(downloadLink[0], key);
       encryptedLinks.push(encryptedLink);
     } else {
+      console.log("6");
       for (const file of files) {
         const fileRef = adminStorage.file(`uploads/${userId}/${file.originalname}`);
         await fileRef.save(file.buffer); 
@@ -144,12 +151,16 @@ router.post('/', upload.array('files'), async (req, res) => {
       }
     }
 
+    console.log("7");
+
     const encryptedNote = encrypt(note, key);
 
+    console.log("8");
 
     // Store metadata in Firestore
     await storeMetadataInFirestore(userId, encryptedLinks[0], encryptedNote);
 
+    console.log("9");
     res.status(200).json({ message: 'Files encrypted successfully.', encryptedLinks });
   } catch (error) {
     console.error('Error during encryption process:', error);

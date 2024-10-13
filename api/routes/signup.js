@@ -20,6 +20,7 @@ const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const firestore = getFirestore(firebaseApp);
 
+console.log("1");
 
 // Registration API endpoint
 router.post('/', async (req, res) => {
@@ -45,6 +46,7 @@ router.post('/', async (req, res) => {
 
     await setDoc(userRefDoc, userData);
     res.status(201).json({ message: 'User registered successfully' });
+    res.send("signup is active");
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
