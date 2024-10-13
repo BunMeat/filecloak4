@@ -32,7 +32,6 @@ function AdminPageDecrypt() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        console.log("user is authenticated", user);
       } else {
         navigate('/login'); // Redirect to login if not authenticated
       }
@@ -47,7 +46,6 @@ function AdminPageDecrypt() {
 
     try {
       const user = auth.currentUser;
-      console.log("user", user);
       if (user) {
         const idToken = await user.getIdToken(); // Get the Firebase ID token
 
