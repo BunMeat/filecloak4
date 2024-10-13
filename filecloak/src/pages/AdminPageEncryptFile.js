@@ -31,23 +31,22 @@ function AdminPageEncryptFile() {
   const [fileNames, setFileNames] = useState(''); // State for displaying file names
   const [fileNotes, setFileNotes] = useState([]); // State to hold notes for each file
 
-  useEffect(() => {
-    setPersistence(auth, browserLocalPersistence)
-      .then(() => {
+    // Authentication check
+    useEffect(() => {
+      const checkAuth = async () => {
+        await setPersistence(auth, browserLocalPersistence); // Ensure persistence is set to local
         const unsubscribe = auth.onAuthStateChanged((user) => {
-          if (user) {
-            // User is authenticated
-          } else {
-            navigate('/login'); // Redirect to login if user is not authenticated
+          if (!user) {
+            navigate('/login'); // Redirect if the user is not authenticated
           }
         });
   
-        return () => unsubscribe(); // Cleanup the subscription on component unmount
-      })
-      .catch((error) => {
-        console.error('Error setting auth persistence:', error);
-      });
-  }, [navigate]);  
+        // Cleanup function
+        return () => unsubscribe();
+      };
+  
+      checkAuth();
+    }, [navigate]); 
 
   const handleLogout = () => {
     signOut(auth)
