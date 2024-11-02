@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut } from 'firebase/auth'; // Firebase auth functions
+import { getFirestore, doc, getDoc } from 'firebase/firestore'
 import FileCloak from '../FileCloak.webp';
 import './AdminPageDecrypt.css';
 import { initializeApp } from 'firebase/app';
@@ -17,6 +18,7 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp); // Firestore instance
 
 function AdminPageDecrypt() {
   const navigate = useNavigate();
@@ -28,19 +30,35 @@ function AdminPageDecrypt() {
   const [decryptedNote, setDecryptedNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [role, setRole] = useState(''); // State to store user role
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        console.log("welcome")
+        try {
+          // Get the user's email
+          const userEmail = user.email;
+          
+          // Fetch the user's Firestore document based on email
+          const userDocRef = doc(db, 'users', userEmail); // Assuming user documents are stored by email
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setRole(userData.role); // Assuming 'role' field exists in the user document
+          } else {
+            console.log('No such user document found');
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        }
       } else {
         console.log('No user authenticated, redirecting to login');
         navigate('/login');
       }
     });
-  
-    return () => unsubscribe();
-  }, [navigate]);
+
+    return () => unsubscribe();})
 
   const handleDecrypt = async (e) => {
     e.preventDefault();
@@ -131,40 +149,46 @@ function AdminPageDecrypt() {
         <header>
           <img src={FileCloak} className="decrypt-logo" alt="FileCloak" />
         </header>
-        <form className="decrypt-form" onSubmit={handleDecrypt}>
-          <div className="decrypt-panel">
-            <div>
-                <div>
-                  <button type="button" className="encrypt-btn" onClick={() => navigate('/encryptfile')}>Encrypt</button><br/>
-                </div>
-                <br/>
-                <div>
-                  <button type="button" className="list-btn" onClick={() => navigate('/datalist')}>Move to List</button><br/>
-                </div>
+        {role === 'admin' && (
+          <form className="decrypt-form" onSubmit={handleDecrypt}>
+            <div className="decrypt-panel">
+              <div>
+                  <div>
+                    <button type="button" className="encrypt-btn" onClick={() => navigate('/encryptfile')}>Encrypt</button><br/>
+                  </div>
+                  <br/>
+                  <div>
+                    <button type="button" className="list-btn" onClick={() => navigate('/datalist')}>Move to List</button><br/>
+                  </div>
+              </div>
+              <div className="file-decryption">
+                <h2 className='header2'>Input Key</h2>
+                <input
+                  type="text"
+                  className='admin-key-input'
+                  value={keyInput}
+                  onChange={(e) => setKeyInput(e.target.value)}
+                  required
+                />
+                <h2 className='header2'>Input Token</h2>
+                <input
+                  type="text"
+                  className='admin-token-input'
+                  value={tokenInput}
+                  onChange={(e) => setTokenInput(e.target.value)}
+                  required
+                />
+                <button type="submit" className='decrypt-btn' disabled={loading}>
+                  {loading ? 'Decrypting...' : 'Decrypt'}
+                </button>
+              </div>
             </div>
-            <div className="file-decryption">
-              <h2 className='header2'>Input Key</h2>
-              <input
-                type="text"
-                className='admin-key-input'
-                value={keyInput}
-                onChange={(e) => setKeyInput(e.target.value)}
-                required
-              />
-              <h2 className='header2'>Input Token</h2>
-              <input
-                type="text"
-                className='admin-token-input'
-                value={tokenInput}
-                onChange={(e) => setTokenInput(e.target.value)}
-                required
-              />
-              <button type="submit" className='decrypt-btn' disabled={loading}>
-                {loading ? 'Decrypting...' : 'Decrypt'}
-              </button>
-            </div>
-          </div>
-        </form>
+          </form>
+        )}
+        
+        {role !== 'admin' && (
+          <p>You do not have admin privileges.</p>
+        )}
       </div>
     </div>
   );

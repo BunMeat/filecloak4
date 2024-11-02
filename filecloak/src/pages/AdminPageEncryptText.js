@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut } from 'firebase/auth'; // Import Firebase auth functions
+import { getFirestore, doc, getDoc } from 'firebase/firestore'
 import FileCloak from '../FileCloak.webp';
 import './AdminPageEncryptText.css';
 import { initializeApp } from 'firebase/app';
@@ -17,6 +18,7 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig); // Initialize only once
 const auth = getAuth(firebaseApp); // Use the firebaseApp for auth
+const db = getFirestore(firebaseApp); // Firestore instance
 
 function AdminPageEncryptText() {
   const navigate = useNavigate();
@@ -24,20 +26,36 @@ function AdminPageEncryptText() {
   const [key, setKey] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
+  const [role, setRole] = useState(''); // State to store user role
 
   // On component mount, check if the user is authenticated
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        console.log("welcome")
+        try {
+          // Get the user's email
+          const userEmail = user.email;
+          
+          // Fetch the user's Firestore document based on email
+          const userDocRef = doc(db, 'users', userEmail); // Assuming user documents are stored by email
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setRole(userData.role); // Assuming 'role' field exists in the user document
+          } else {
+            console.log('No such user document found');
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        }
       } else {
         console.log('No user authenticated, redirecting to login');
         navigate('/login');
       }
     });
-  
-    return () => unsubscribe();
-  }, [navigate]);
+
+    return () => unsubscribe();})
 
   const handleLogout = () => {
     signOut(auth)
@@ -97,59 +115,65 @@ function AdminPageEncryptText() {
           <header>
             <img src={FileCloak} className="encrypt-text-logo" alt="FileCloak" />
           </header>
-          <form className="encrypt-text-form" onSubmit={handleEncrypt}>
-            <div className="encrypt-text-panel">
-              <div className="file-encryption">
-                <h2>Input Text</h2>
-                <div>
-                  <textarea
-                    id="textToEncrypt"
-                    rows="3"
-                    cols="50"
-                    maxLength="500"
-                    placeholder="Input your text"
-                    value={textToEncrypt}
-                    onChange={(e) => setTextToEncrypt(e.target.value)}
-                  /><br/>
+          {role === 'admin' && (
+            <form className="encrypt-text-form" onSubmit={handleEncrypt}>
+              <div className="encrypt-text-panel">
+                <div className="file-encryption">
+                  <h2>Input Text</h2>
+                  <div>
+                    <textarea
+                      id="textToEncrypt"
+                      rows="3"
+                      cols="50"
+                      maxLength="500"
+                      placeholder="Input your text"
+                      value={textToEncrypt}
+                      onChange={(e) => setTextToEncrypt(e.target.value)}
+                    /><br/>
+                  </div>
+                  <div>
+                    <textarea
+                      id="keyGen"
+                      rows="3"
+                      cols="50"
+                      maxLength="64"
+                      placeholder="You can also input a 64 character long key"
+                      value={key}
+                      onChange={(e) => setKey(e.target.value)}
+                    /><br/>
+                    <p className='counter-tracker'><span id="counter">{key.length}</span> / 64 characters</p>
+                    <button id="keyGenButton" type="button" onClick={() => setKey(generateKey())}>Generate Key</button><br/>
+                    <button id="copyButton" type="button" onClick={() => navigator.clipboard.writeText(key)}>Copy to Clipboard</button>
+                  </div>
+                  <div>
+                    <textarea
+                      id="output"
+                      rows="9"
+                      cols="50"
+                      readOnly
+                      value={output}
+                    /><br/>
+                    <button id="copyButton2" type="button" onClick={() => navigator.clipboard.writeText(output)}>Copy to Clipboard</button>
+                  </div>
+                  <button type="submit" className="encrypt-btn">Encrypt</button>
+                  {error && <p className="error-message">{error}</p>}
                 </div>
                 <div>
-                  <textarea
-                    id="keyGen"
-                    rows="3"
-                    cols="50"
-                    maxLength="64"
-                    placeholder="You can also input a 64 character long key"
-                    value={key}
-                    onChange={(e) => setKey(e.target.value)}
-                  /><br/>
-                  <p className='counter-tracker'><span id="counter">{key.length}</span> / 64 characters</p>
-                  <button id="keyGenButton" type="button" onClick={() => setKey(generateKey())}>Generate Key</button><br/>
-                  <button id="copyButton" type="button" onClick={() => navigator.clipboard.writeText(key)}>Copy to Clipboard</button>
+                  <div>
+                    <button type="button" className="decrypt-btn" id="decryptButton" onClick={() => navigate('/decrypt')}>Decrypt</button><br />
+                  </div>
+                  <br />
+                  <div>
+                    <button type="button" className="list-btn" id="listButton" onClick={() => navigate('/datalist')}>List Files</button><br />
+                  </div>
                 </div>
-                <div>
-                  <textarea
-                    id="output"
-                    rows="9"
-                    cols="50"
-                    readOnly
-                    value={output}
-                  /><br/>
-                  <button id="copyButton2" type="button" onClick={() => navigator.clipboard.writeText(output)}>Copy to Clipboard</button>
-                </div>
-                <button type="submit" className="encrypt-btn">Encrypt</button>
-                {error && <p className="error-message">{error}</p>}
               </div>
-              <div>
-                <div>
-                  <button type="button" className="decrypt-btn" id="decryptButton" onClick={() => navigate('/decrypt')}>Decrypt</button><br />
-                </div>
-                <br />
-                <div>
-                  <button type="button" className="list-btn" id="listButton" onClick={() => navigate('/datalist')}>List Files</button><br />
-                </div>
-              </div>
-            </div>
-          </form>
+            </form>
+          )}
+          
+          {role !== 'admin' && (
+            <p>You do not have admin privileges.</p>
+          )}
         </div>
       </div>
     </>

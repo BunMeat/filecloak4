@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut } from 'firebase/auth'; // Firebase auth functions
+import { getFirestore, doc, getDoc } from 'firebase/firestore'
 import FileCloak from '../FileCloak.webp';
 import './UserPage.css';
 import { initializeApp } from 'firebase/app';
@@ -17,6 +18,7 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp); // Firestore instance
 
 function AdminPageDecrypt() {
   const navigate = useNavigate();
@@ -28,19 +30,35 @@ function AdminPageDecrypt() {
   const [error, setError] = useState('');
   const [decryptedURL, setDecryptedURL] = useState('');
   const [decryptedNote, setDecryptedNote] = useState('');
+  const [role, setRole] = useState(''); // State to store user role
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        console.log("welcome")
+        try {
+          // Get the user's email
+          const userEmail = user.email;
+          
+          // Fetch the user's Firestore document based on email
+          const userDocRef = doc(db, 'users', userEmail); // Assuming user documents are stored by email
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setRole(userData.role); // Assuming 'role' field exists in the user document
+          } else {
+            console.log('No such user document found');
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        }
       } else {
         console.log('No user authenticated, redirecting to login');
         navigate('/login');
       }
     });
-  
-    return () => unsubscribe();
-  }, [navigate]);
+
+    return () => unsubscribe();})
 
   const handleLogout = () => {
     signOut(auth)
@@ -130,8 +148,9 @@ function AdminPageDecrypt() {
         <header>
           <img src={FileCloak} className="userpage-logo" alt="FileCloak" />
         </header>
-          <div className="userpage-panel">
-            <form className="userpage-form" onSubmit={handleDecrypt}>
+        {role === 'user' && (
+          <form className="userpage-form" onSubmit={handleDecrypt}>
+            <div className="userpage-panel">
               <div className="file-decryption">
                 <h2 className='header2'>Input Key</h2>
                 <input
@@ -153,8 +172,13 @@ function AdminPageDecrypt() {
                   {loading ? 'Decrypting...' : 'Decrypt'}
                 </button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
+        )}
+        
+        {role !== 'user' && (
+          <p>You do not belong here.</p>
+        )}
       </div>
     </div>
   );

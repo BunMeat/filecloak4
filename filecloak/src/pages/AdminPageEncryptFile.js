@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signOut, setPersistence, browserLocalPersistence } from 'firebase/auth'; // Import Firebase auth functions
+import { getAuth, signOut } from 'firebase/auth'; // Import Firebase auth functions
+import { getFirestore, doc, getDoc } from 'firebase/firestore'
 import FileCloak from '../FileCloak.webp';
 import './AdminPageEncryptFile.css';
 import CryptoJS from 'crypto-js';
@@ -19,6 +20,7 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig); // Initialize only once
 const auth = getAuth(firebaseApp); // Use the firebaseApp for auth
+const db = getFirestore(firebaseApp); // Firestore instance
 
 function AdminPageEncryptFile() {
   const navigate = useNavigate();
@@ -30,20 +32,35 @@ function AdminPageEncryptFile() {
   const [error, setError] = useState('');
   const [fileNames, setFileNames] = useState(''); // State for displaying file names
   const [fileNotes, setFileNotes] = useState([]); // State to hold notes for each file
+  const [role, setRole] = useState(''); // State to store user role
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
-        console.log("welcome")
+        try {
+          // Get the user's email
+          const userEmail = user.email;
+          
+          // Fetch the user's Firestore document based on email
+          const userDocRef = doc(db, 'users', userEmail); // Assuming user documents are stored by email
+          const userDoc = await getDoc(userDocRef);
+
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setRole(userData.role); // Assuming 'role' field exists in the user document
+          } else {
+            console.log('No such user document found');
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        }
       } else {
         console.log('No user authenticated, redirecting to login');
         navigate('/login');
       }
     });
-  
-    return () => unsubscribe();
-  }, [navigate]);
-  
+
+    return () => unsubscribe();})
 
   const handleLogout = () => {
     signOut(auth)
@@ -167,145 +184,151 @@ function AdminPageEncryptFile() {
         <header>
           <img src={FileCloak} className="encrypt-file-logo" alt="FileCloak" />
         </header>
-        <form className="encrypt-file-form" onSubmit={handleEncrypt}>
-          <div className="encrypt-file-panel">
-            <div className="file-encryption">
-              <h2 className='header2'>Input File</h2>
-              <div>
-                <button
-                  type="button"
-                  className="encrypt-text-btn"
-                  id="encryptTextButton"
-                  onClick={() => navigate('/encrypttext')}
-                >
-                  Encrypt Text
-                </button>
-                <br />
-              </div>
-              <div className="file-input-div">
-                <div className="drop-area" id="dropArea">
-                  {!fileNames && <p>Drag and drop files or click to select</p>}
-                  <input
-                    className="file-input"
-                    type="file"
-                    id="fileInput"
-                    name="file"
-                    multiple
-                    required
-                    onChange={handleFileChange}
-                  />
-                  {fileNames && <p>Files Selected: {fileNames}</p>}
+        {role === 'admin' && (
+          <form className="encrypt-file-form" onSubmit={handleEncrypt}>
+            <div className="encrypt-file-panel">
+              <div className="file-encryption">
+                <h2 className='header2'>Input File</h2>
+                <div>
+                  <button
+                    type="button"
+                    className="encrypt-text-btn"
+                    id="encryptTextButton"
+                    onClick={() => navigate('/encrypttext')}
+                  >
+                    Encrypt Text
+                  </button>
+                  <br />
                 </div>
-
-                <div className="zip-checkbox-container">
-                  <label>
+                <div className="file-input-div">
+                  <div className="drop-area" id="dropArea">
+                    {!fileNames && <p>Drag and drop files or click to select</p>}
                     <input
-                      className="checkbox"
-                      type="checkbox"
-                      id="zipFilesCheckbox"
-                      checked={zipFiles}
-                      onChange={handleZipCheckboxChange}
-                    />{' '}
-                    Zip Files
-                  </label>
-                </div>
-              </div>
-              <div>
-                <textarea
-                  type='text'
-                  className='counter'
-                  id="keyGen"
-                  rows="3"
-                  cols="60"
-                  placeholder="You can also input a 64 character long key"
-                  maxLength="64"
-                  value={encryptionKey}
-                  onChange={handleKeyChange}
-                ></textarea>
-                <br />
-                <p className='counter-tracker'>
-                  <span id="counter">{encryptionKey.length}</span> / 64 characters
-                </p>
-                <button
-                  className='keygen-btn'
-                  id="keyGenButton"
-                  type="button"
-                  onClick={() => setEncryptionKey(CryptoJS.lib.WordArray.random(64).toString())}
-                >
-                  Generate Key
-                </button>
-                <br />
-                <button
-                  className='copy-btn'
-                  id="copyButton"
-                  type="button"
-                  onClick={() => navigator.clipboard.writeText(encryptionKey)}
-                >
-                  Copy to Clipboard
-                </button>
-              </div>
-              
-              {/* Render textareas for notes based on the number of files */}
-              {files.length > 0 && (
-                <div>
-                  <h3>Notes for Files</h3>
-                  {Array.from(files).map((_, index) => (
-                    <div key={index}>
-                      <label>Note for {files[index].name}:</label>
-                      <textarea
-                        rows="3"
-                        cols="50"
-                        value={fileNotes[index]}
-                        onChange={(e) => handleNoteChange(index, e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
+                      className="file-input"
+                      type="file"
+                      id="fileInput"
+                      name="file"
+                      multiple
+                      required
+                      onChange={handleFileChange}
+                    />
+                    {fileNames && <p>Files Selected: {fileNames}</p>}
+                  </div>
 
-              <button type="submit" className="encrypt-btn" id="encryptButton">
-                Encrypt
-              </button>
-              {error && <p className="error-message">{error}</p>}
-              {encryptedLinks.length > 0 && (
+                  <div className="zip-checkbox-container">
+                    <label>
+                      <input
+                        className="checkbox"
+                        type="checkbox"
+                        id="zipFilesCheckbox"
+                        checked={zipFiles}
+                        onChange={handleZipCheckboxChange}
+                      />{' '}
+                      Zip Files
+                    </label>
+                  </div>
+                </div>
                 <div>
-                  {encryptedLinks.map((link, index) => (
-                    <div key={index}>
-                      <textarea
-                        rows="3"
-                        cols="80"
-                        value={link}
-                        readOnly
-                        className="encrypted-links-textarea"
-                      />
-                      <button
-                        className="copy-btn"
-                        type="button"
-                        onClick={() => navigator.clipboard.writeText(link)}
-                      >
-                        Copy to Clipboard
-                      </button>
-                    </div>
-                  ))}
-
-                  {/* Export to TXT button */}
-                  <button className="export-btn" type="button" onClick={exportToTxt}>
-                    Export to .txt
+                  <textarea
+                    type='text'
+                    className='counter'
+                    id="keyGen"
+                    rows="3"
+                    cols="60"
+                    placeholder="You can also input a 64 character long key"
+                    maxLength="64"
+                    value={encryptionKey}
+                    onChange={handleKeyChange}
+                  ></textarea>
+                  <br />
+                  <p className='counter-tracker'>
+                    <span id="counter">{encryptionKey.length}</span> / 64 characters
+                  </p>
+                  <button
+                    className='keygen-btn'
+                    id="keyGenButton"
+                    type="button"
+                    onClick={() => setEncryptionKey(CryptoJS.lib.WordArray.random(64).toString())}
+                  >
+                    Generate Key
+                  </button>
+                  <br />
+                  <button
+                    className='copy-btn'
+                    id="copyButton"
+                    type="button"
+                    onClick={() => navigator.clipboard.writeText(encryptionKey)}
+                  >
+                    Copy to Clipboard
                   </button>
                 </div>
-              )}
-            </div>
-            <div>
-              <div>
-                <button type="button" className="decrypt-btn" id="decryptButton" onClick={() => navigate('/decrypt')}>Decrypt</button><br />
+                
+                {/* Render textareas for notes based on the number of files */}
+                {files.length > 0 && (
+                  <div>
+                    <h3>Notes for Files</h3>
+                    {Array.from(files).map((_, index) => (
+                      <div key={index}>
+                        <label>Note for {files[index].name}:</label>
+                        <textarea
+                          rows="3"
+                          cols="50"
+                          value={fileNotes[index]}
+                          onChange={(e) => handleNoteChange(index, e.target.value)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <button type="submit" className="encrypt-btn" id="encryptButton">
+                  Encrypt
+                </button>
+                {error && <p className="error-message">{error}</p>}
+                {encryptedLinks.length > 0 && (
+                  <div>
+                    {encryptedLinks.map((link, index) => (
+                      <div key={index}>
+                        <textarea
+                          rows="3"
+                          cols="80"
+                          value={link}
+                          readOnly
+                          className="encrypted-links-textarea"
+                        />
+                        <button
+                          className="copy-btn"
+                          type="button"
+                          onClick={() => navigator.clipboard.writeText(link)}
+                        >
+                          Copy to Clipboard
+                        </button>
+                      </div>
+                    ))}
+
+                    {/* Export to TXT button */}
+                    <button className="export-btn" type="button" onClick={exportToTxt}>
+                      Export to .txt
+                    </button>
+                  </div>
+                )}
               </div>
-              <br />
               <div>
-                <button type="button" className="list-btn" id="listButton" onClick={() => navigate('/datalist')}>List Files</button><br />
+                <div>
+                  <button type="button" className="decrypt-btn" id="decryptButton" onClick={() => navigate('/decrypt')}>Decrypt</button><br />
+                </div>
+                <br />
+                <div>
+                  <button type="button" className="list-btn" id="listButton" onClick={() => navigate('/datalist')}>List Files</button><br />
+                </div>
               </div>
             </div>
-          </div>
-        </form>
+          </form>
+        )}
+        
+        {role !== 'admin' && (
+          <p>You do not have admin privileges.</p>
+        )}
       </div>
     </div>
   );
