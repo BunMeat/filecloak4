@@ -22,6 +22,13 @@ class MainApp extends React.Component {
       .catch(err => console.error(err));
   }
 
+  // callApi() {
+  //   fetch("http://localhost:4000/api/testApi")
+  //     .then(res => res.text())
+  //     .then(res => this.setState({ apiResponse: res }))
+  //     .catch(err => console.error(err));
+  // }
+
   componentDidMount() {
     this.callApi();
   }

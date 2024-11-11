@@ -116,6 +116,7 @@ function AdminPageEncryptFile() {
         });
   
         const response = await fetch('https://filecloak4.vercel.app/api/encryptfile', {
+        // const response = await fetch('http://localhost:4000/api/encryptfile', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${idToken}`, // Include ID token in the Authorization header
