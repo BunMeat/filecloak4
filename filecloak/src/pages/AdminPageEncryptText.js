@@ -165,7 +165,7 @@ function AdminPageEncryptText() {
                   </div>
                   <br />
                   <div>
-                    <button type="button" className="list-btn" id="listButton" onClick={() => navigate('/datalist')}>List Files</button><br />
+                    <button type="button" className="list-btn" id="listButton" onClick={() => navigate('/datalist')}>Move to List</button><br />
                   </div>
                 </div>
               </div>
