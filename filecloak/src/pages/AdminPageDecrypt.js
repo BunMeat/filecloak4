@@ -70,6 +70,7 @@ function AdminPageDecrypt() {
         const idToken = await user.getIdToken(); // Get the Firebase ID token
 
         const response = await fetch('https://filecloak4.vercel.app/api/decrypt', {
+        // const response = await fetch('http://localhost:4000/api/decrypt', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
