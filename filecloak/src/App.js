@@ -5,9 +5,11 @@ import SignUp from './pages/SignUp';
 import Login from './pages/Login';
 import HomePage from './pages/HomePage';
 import UserPage from './pages/UserPage';
+import UserPageText from './pages/UserPageText'
 import AdminPageEncryptFile from './pages/AdminPageEncryptFile';
 import AdminPageEncryptText from './pages/AdminPageEncryptText';
 import AdminPageDecrypt from './pages/AdminPageDecrypt';
+import AdminPageDecryptText from './pages/AdminPageDecryptText';
 import DataList from './pages/GetDataList';
 class MainApp extends React.Component {
   constructor(props) {
@@ -41,9 +43,11 @@ class MainApp extends React.Component {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/userpage" element={<UserPage />} />
+          <Route path="/userpagetext" element={<UserPageText />} />
           <Route path="/encryptfile" element={<AdminPageEncryptFile />} />
           <Route path="/encrypttext" element={<AdminPageEncryptText />} />
           <Route path="/decrypt" element={<AdminPageDecrypt />} />
+          <Route path="/decrypttext" element={<AdminPageDecryptText />} />
           <Route path="/datalist" element={<DataList />} />
         </Routes>
       </Router>
