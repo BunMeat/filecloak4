@@ -2,100 +2,53 @@ require('dotenv').config();
 var express = require('express');
 var CryptoJS = require('crypto-js');
 var router = express.Router();
-var { initializeApp } = require('firebase/app');
-var { getFirestore, collection, getDocs } = require('firebase/firestore');
-var firebaseAdmin = require('firebase-admin');
-
-// Firebase Configuration
-const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.PROJECT_ID,
-  storageBucket: process.env.STORAGE_BUCKET,
-  messagingSenderId: process.env.MESSAGING_SENDER_ID,
-  appId: process.env.APP_ID,
-};
-
-const firebaseApp = initializeApp(firebaseConfig);
-const firestore = getFirestore(firebaseApp);
-
-// Initialize Firebase Admin (if not already initialized elsewhere)
-if (!firebaseAdmin.apps.length) {
-  firebaseAdmin.initializeApp({
-    credential: firebaseAdmin.credential.cert({
-      type: process.env.TYPE,
-      project_id: process.env.PROJECT_ID,
-      private_key_id: process.env.PRIVATE_KEY_ID,
-      private_key: process.env.PRIVATE_KEY.replace(/\\n/g, '\n'),
-      client_email: process.env.CLIENT_EMAIL,
-      client_id: process.env.CLIENT_ID,
-      auth_uri: process.env.AUTH_URI,
-      token_uri: process.env.TOKEN_URI,
-      auth_provider_x509_cert_url: process.env.AUTH_PROVIDER_X509_CERT_URL,
-      client_x509_cert_url: process.env.CLIENT_X509_CERT_URL,
-    }),
-  });
-}
 
 // AES Decrypt function
-function decrypt(encryptedText, key) {
-  const encryptKey = CryptoJS.enc.Utf8.parse(key);
-  const ivString = encryptedText.slice(-24); // Extract the IV
-  const encryptIV = CryptoJS.enc.Base64.parse(ivString);
-  encryptedText = encryptedText.slice(0, -24); // Remove IV part
 
-  const decrypted = CryptoJS.AES.decrypt(encryptedText, encryptKey, { iv: encryptIV });
-  return decrypted.toString(CryptoJS.enc.Utf8);
-}
 
-// Firebase Admin token verification
-async function verifyIdToken(idToken) {
-  try {
-    const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
-    return decodedToken;
-  } catch (error) {
-    throw new Error('Invalid token');
+  // 20250101_000309(0) (39).jpg-kcicct.enc file name
+  // 5d119497f7d54b1abe3e97bdc05e29ae57031d92fb20d03303a252042bf405cb key
+  // Ort4OxWyfMpiP8YZPpZW2w==:69d099399319801439351af1b724ca56 encryptedText
+  // hahaha expected result
+
+  function decrypt(encryptedText, key) {
+    // Split the ciphertext and IV
+    const [ciphertext, ivHex] = encryptedText.split(':');
+    if (!ciphertext || !ivHex) {
+      throw new Error('Invalid encrypted text format');
+    }
+  
+    // Parse the key and IV from hexadecimal strings
+    const decryptKey = CryptoJS.enc.Hex.parse(key);
+    const decryptIV = CryptoJS.enc.Hex.parse(ivHex);
+  
+    // Decrypt the text
+    const decrypted = CryptoJS.AES.decrypt(ciphertext, decryptKey, { iv: decryptIV });
+  
+    // Convert decrypted content to a UTF-8 string
+    return decrypted.toString(CryptoJS.enc.Utf8);
   }
-}
+  
 
 // Route for decryption
 router.post('/', async (req, res) => {
-  const { keyInput, tokenInput } = req.body;
+  const { encryptedText, key } = req.body;
+  console.log("encryptedText: ", encryptedText);
+  console.log("key: ", key)
 
-  if (!keyInput || !tokenInput) {
-    return res.status(400).json({ message: 'Missing encryption token or key.' });
+  if (!encryptedText || !key) {
+    return res.status(400).json({ error: 'Encrypted text and key are required' });
   }
 
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Unauthorized. No token provided.' });
-    }
-
-    const idToken = authHeader.split('Bearer ')[1];
-    await verifyIdToken(idToken); // Verify Firebase token
-
-    const encryptedFilesCollection = collection(firestore, "encryptedFiles");
-    const querySnapshot = await getDocs(encryptedFilesCollection);
-    let foundFile = null;
-
-    querySnapshot.forEach((doc) => {
-      if (doc.data().encryptUrl === tokenInput) {
-        foundFile = doc.data();
-      }
-    });
-
-    if (foundFile) {
-      const decryptedNote = decrypt(foundFile.encryptNote, keyInput);
-      return res.status(200).json({ decryptedURL: foundFile.decryptUrl, decryptedNote });
-    } else {
-      const decryptedNote = decrypt(tokenInput, keyInput); // Decrypt directly if not found
-      return res.status(200).json({ decryptedURL: null, decryptedNote });
-    }
+    const decryptedText = decrypt(encryptedText, key);
+    console.log("decryptedText: ", decryptedText)
+    res.status(200).json({ decryptedText });
   } catch (error) {
-    console.error('Error during decryption:', error);
-    return res.status(500).json({ message: 'Error during decryption: ' + error.message });
+    console.error('Decryption failed', error);
+    res.status(500).json({ error: 'Decryption failed' });
   }
 });
+
 
 module.exports = router;
