@@ -1,0 +1,14 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{email} {
+      allow read, update, write; 
+    }
+  	
+    match /users/{email}/files/{fileId} {
+      allow read, update, write; 
+    }
+    match /encryptedFiles/{fileId} {
+      allow read, write;
+    }
+  }
+}
