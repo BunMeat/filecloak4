@@ -129,8 +129,9 @@ function DataList() {
                     <ul>
                       {item.files.map((file, index) => (
                         <li key={index} className='individual-list'>
-                          <p>Encryption Token: {file.encryptUrl}</p>
-                          <p>Date: {file.timestamp}</p>
+                          <p>File Name: {file.fileName}</p>
+                          <p>File URL: {file.fileUrl}</p>
+                          <p>Date Uploaded: {file.dateUploaded}</p>
                         </li>
                       ))}
                     </ul>
