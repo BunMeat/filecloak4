@@ -3,12 +3,12 @@ require('dotenv').config();
 var express = require('express');
 var multer = require('multer');
 var firebaseAdmin = require('firebase-admin');
-var JSZip = require('jszip');
 var CryptoJS = require('crypto-js');
 var router = express.Router();
 var upload = multer();
 var { initializeApp } = require('firebase/app');
 var { getFirestore, collection, doc, setDoc } = require('firebase/firestore');
+const crypto = require('crypto');
 
 const firebaseAdminCredentials = {
   type: process.env.TYPE,
@@ -43,118 +43,34 @@ const firebaseApp = initializeApp(firebaseConfig);
 const firestore = getFirestore(firebaseApp);
 const storage = firebaseAdmin.storage();
 
-// Encrypt function
-function encrypt(text, key) {
-  const encryptKey = CryptoJS.enc.Utf8.parse(key);
-  const encryptIV = CryptoJS.lib.WordArray.random(16);
+// // Encrypt function for notes
+function encrypt(text, key, IV) {
+  // Parse the key and IV from hexadecimal strings
+  const encryptKey = CryptoJS.enc.Hex.parse(key);
+  const encryptIV = CryptoJS.enc.Hex.parse(IV);
+
+  // Encrypt the text
   const encrypted = CryptoJS.AES.encrypt(text, encryptKey, { iv: encryptIV }).toString();
-  return encrypted + ':' + encryptIV.toString(CryptoJS.enc.Base64);
+
+  // Return the encrypted text (ciphertext only) and IV as a colon-separated string
+  return encrypted
 }
 
-// Convert to WIB timezone function
-function convertToWIB(isoString) {
-  const date = new Date(isoString);
-  const WIB_OFFSET = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
-  const wibDate = new Date(date.getTime() + WIB_OFFSET);
-  return wibDate.toISOString().replace('Z', '+07:00');
-}
 
-// Verify ID token using Firebase Admin SDK
-async function verifyIdToken(idToken) {
-  try {
-    const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+// Handle note encryption
+router.post('/', async (req, res) => {
+  const { text, key, iv } = req.body;
 
-    return decodedToken; // Returns user data if successful
-  } catch (error) {
-    throw new Error('ID token verification failed');
+  if (!text || !key) {
+    return res.status(400).json({ error: 'Text and key are required' });
   }
-}
 
-
-// Store metadata in Firestore
-async function storeMetadataInFirestore(userId, encryptedLinks, encryptedNote) {
   try {
-    const time = new Date().toISOString();
-    const convertedTime = convertToWIB(time);
-    const userCollection = collection(firestore, "users");
-    const userRefDoc = doc(userCollection, userId);
-    const filesSubCollection = collection(userRefDoc, "files");
-    const filesSubRefDoc = doc(filesSubCollection, convertedTime);
-
-    const encryptedFilesCollection = collection(firestore, "encryptedFiles");
-    const encryptedFilesRefDoc = doc(encryptedFilesCollection, convertedTime);
-
-    // Store all encrypted links
-    await setDoc(filesSubRefDoc, { encryptedLinks });
-    await setDoc(encryptedFilesRefDoc, { encryptedLinks, encryptedNote });
+    const encryptedText = encrypt(text, key, iv);
+    res.status(200).json({ encryptedText });
   } catch (error) {
-    throw new Error('Error storing metadata in Firestore: ' + error.message);
-  }
-}
-
-
-// Initialize Firebase Admin SDK for Storage
-const adminStorage = firebaseAdmin.storage().bucket(); // This uses the Admin SDK to access the bucket
-
-// Handle file upload and encryption
-router.post('/', upload.array('files'), async (req, res) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'Authorization header is malformed' });
-    }
-
-    const idToken = authHeader.split('Bearer ')[1];
-    const userData = await verifyIdToken(idToken);
-    const userId = userData.uid;
-
-
-    const files = req.files;
-    const { key, note, zipFiles } = req.body;
-    const encryptedLinks = [];
-    const zip = new JSZip();
-
-
-    if (!files || !key) {
-      return res.status(400).json({ message: 'No files or encryption key provided.' });
-    }
-
-    if (zipFiles === 'true') {
-      for (const file of files) {
-        zip.file(file.originalname, file.buffer);
-      }
-
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
-      const zipName = 'encryptedFiles.zip';
-      const storageRef = storage.bucket().file(`uploads/${userId}/${zipName}`);
-      await storageRef.save(Buffer.from(await zipBlob.arrayBuffer())); 
-      
-      const downloadLink = await storageRef.getSignedUrl({ action: 'read', expires: '03-01-2500' });
-      const encryptedLink = encrypt(downloadLink[0], key);
-      encryptedLinks.push(encryptedLink);
-    } else {
-      for (const file of files) {
-        const fileRef = adminStorage.file(`uploads/${userId}/${file.originalname}`);
-        await fileRef.save(file.buffer); 
-        const [downloadLink] = await fileRef.getSignedUrl({ action: 'read', expires: '03-01-2500' });
-        const encryptedLink = encrypt(downloadLink, key);
-        encryptedLinks.push(encryptedLink);
-      }
-    }
-
-
-    const encryptedNote = encrypt(note, key);
-
-
-    // Store metadata in Firestore
-    await storeMetadataInFirestore(userId, encryptedLinks[0], encryptedNote);
-
-    res.status(200).json({ message: 'Files encrypted successfully.', encryptedLinks });
-  } catch (error) {
-    console.error('Error during encryption process:', error);
-    res.status(500).json({ message: 'An error occurred during the encryption process.' });
+    console.error('Encryption failed', error);
+    res.status(500).json({ error: 'Encryption failed' });
   }
 });
-
 module.exports = router;
