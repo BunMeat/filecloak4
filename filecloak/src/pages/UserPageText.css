@@ -1,0 +1,104 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+.userpagetext-body {
+    height: 100vh;
+    background-color: #BED8D4;
+    overflow: hidden;
+}
+
+.userpagetext-container {
+    width: 80%;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+}
+
+.userpagetext-logo {
+    width: 200px;
+    margin-bottom: 20px;
+}
+
+.file-decryption {
+    background: #f8f8f8;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.header2 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.logoutButton {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.decrypt {
+    background-color: #f44336;
+}
+
+.logout-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #f44336;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.decrypt-btn {
+    width: 100%;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #ff1100;
+}
+
+.button:hover {
+    opacity: 0.8;
+}
+
+button:focus {
+    outline: none;
+}
+
+.userpagetext-key-input, .userpagetext-token-input{
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.userpagetext-panel {
+    width: 450px;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .panel {
+        grid-template-columns: 1fr;
+    }
+}
