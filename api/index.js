@@ -14,6 +14,7 @@ var encryptFileRouter = require('./routes/encryptFile');
 var encryptTextRouter = require('./routes/encryptText');
 var decryptRouter = require('./routes/decrypt');
 var dataListRouter = require('./routes/getDataList')
+var decryptTextRouter = require('./routes/decryptText')
 var app = express();
 
 app.use(logger('dev'));
@@ -35,6 +36,7 @@ app.use('/api/signup', signupRouter);
 app.use('/api/encryptfile', encryptFileRouter);
 app.use('/api/encrypttext', encryptTextRouter);
 app.use('/api/decrypt', decryptRouter);
+app.use('/api/decrypttext', decryptTextRouter);
 app.use('/api/datalist', dataListRouter);
 
 // catch 404 and forward to error handler
