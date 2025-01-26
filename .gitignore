@@ -6,6 +6,13 @@ yarn-debug.log*
 yarn-error.log*
 firebase-debug.log*
 firebase-debug.*.log*
+.firebaserc
+apphosting.yaml
+cors.json
+firebase.json
+firestore.indexes.json
+firestore.rules
+storage.rules
 
 # Firebase cache
 .firebase/
