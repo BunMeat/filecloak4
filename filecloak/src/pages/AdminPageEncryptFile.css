@@ -68,7 +68,25 @@
     margin-bottom: 20px;
     position: relative;
   }
-  
+
+.zip-checkbox-container {
+    flex: 1; /* Smaller proportion */
+    margin-left: 10px; /* Add some spacing between drop-area and checkbox */
+}
+
+.file-input {
+    position: absolute; /* Make it absolute to overlay only the drop-area */
+    opacity: 0; /* Hide the file input */
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
 .drop-area {
     flex: 3; /* Larger proportion to take up more space */
     border: 2px dashed #aaa;
@@ -78,21 +96,9 @@
     cursor: pointer;
     padding: 20px; /* Add some padding for better visual appearance */
     background-color: rgba(255, 255, 255, 0.7); /* Optional: To make the drop area slightly translucent */
+    position: relative; /* Required for positioning the file input */
 }
 
-.zip-checkbox-container {
-    flex: 1; /* Smaller proportion */
-    margin-left: 10px; /* Add some spacing between drop-area and checkbox */
-}
-
-.file-input {
-    position: absolute; /* Make it absolute to overlay the entire container */
-    opacity: 0; /* Hide the file input */
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    z-index: 1;
-}
   
 .encrypt-text-btn, .encrypt-btn, .decrypt-btn, .list-btn {
     width: 100%;

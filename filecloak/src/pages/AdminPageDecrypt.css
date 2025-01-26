@@ -5,6 +5,13 @@
     font-family: 'Arial', sans-serif;
 }
 
+.file-input-div {
+    display: flex;
+    align-items: center; /* Align items vertically centered */
+    margin-bottom: 20px;
+    position: relative;
+  }
+
 .decrypt-body{
     height: 100vh;
     background-color: #BED8D4;
@@ -22,7 +29,6 @@
     align-items: center;
     flex-direction: column;
     position: relative;
-    height: 580px;
 }
 
 .decrypt-logo{
@@ -41,7 +47,7 @@
 .file-decryption {
     background: #f8f8f8;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 5px;
 }
 
 .header2 {
@@ -76,7 +82,7 @@
     cursor: pointer;
 }
 
-.encrypt-btn, .decrypt-btn, .list-btn{
+.encrypt-btn, .decrypt-btn, .decrypt-text-btn, .list-btn{
     width: 100%;
     padding: 10px;
     border: none;
@@ -92,6 +98,10 @@
 
 .decrypt-btn {
     background-color: #f44336;
+}
+
+.decrypt-text-btn {
+    background-color: dimgray;
 }
 
 .list-btn {

@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut } from 'firebase/auth'; // Firebase auth functions
 import { getFirestore, doc, getDoc } from 'firebase/firestore'
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import FileCloak from '../FileCloak.webp';
 import './AdminPageDecrypt.css';
 import { initializeApp } from 'firebase/app';
+import { Buffer } from 'buffer';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -19,6 +21,7 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp); // Firestore instance
+const storage = getStorage(firebaseApp)
 
 function AdminPageDecrypt() {
   const navigate = useNavigate();
@@ -31,6 +34,9 @@ function AdminPageDecrypt() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [role, setRole] = useState(''); // State to store user role
+  const [files, setFiles] = useState([]);
+  const [fileNames, setFileNames] = useState(''); // State for displaying file names
+  const [fileNotes, setFileNotes] = useState([]); // State to hold notes for each file
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -60,53 +66,142 @@ function AdminPageDecrypt() {
 
     return () => unsubscribe();})
 
-  const handleDecrypt = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const user = auth.currentUser;
-      if (user) {
-        const idToken = await user.getIdToken(); // Get the Firebase ID token
-
-        const response = await fetch('https://filecloak4.vercel.app/api/decrypt', {
-        // const response = await fetch('http://localhost:4000/api/decrypt', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`, // Include ID token in the header
-          },
-          body: JSON.stringify({
-            keyInput: keyInput.trim(),
-            tokenInput: tokenInput.trim(),
-          }),
-        });
-
-        const data = await response.json();
-        setLoading(false);
-
-        if (response.ok) {
-          setDecryptedURL(data.decryptedURL || '');
-          setDecryptedNote(data.decryptedNote || '');
-
-          if (data.decryptedURL && data.decryptedNote) {
-            exportToTxt(data.decryptedURL, data.decryptedNote);
-          } else if (data.decryptedNote) {
-            exportToTxt2(data.decryptedNote);
-          }
-        } else {
-          alert(data.message);
-        }
-      } else {
-        alert('User is not authenticated.');
-        setLoading(false);
+    const hexToUint8Array = (hexString) => {
+      if (!/^[\da-fA-F]+$/.test(hexString)) {
+        throw new Error('Invalid hex string: Contains non-hex characters');
       }
-    } catch (error) {
-      console.error('Error during decryption:', error);
-      alert('Error during decryption.');
-      setLoading(false);
+      const byteArray = new Uint8Array(hexString.length / 2);
+      for (let i = 0; i < hexString.length; i += 2) {
+        byteArray[i / 2] = parseInt(hexString.slice(i, i + 2), 16);
+      }
+      return byteArray;
+    };
+
+const nameCleaner = (encryptedFileName) => {
+  const regex = /(.+)-[\w\d]+\.enc$/; // Matches the name before the last hyphen and ".enc"
+  
+  console.log("encryptedFileName: ", encryptedFileName);
+
+  if (encryptedFileName.endsWith('.jpeg')) {
+    // Find the part before the last hyphen and ".jpeg"
+    const jpegMatch = encryptedFileName.match(/(.+)-[\w\d]+\.jpeg$/);
+    if (jpegMatch && jpegMatch[1]) {
+      return jpegMatch[1]; // Return the trimmed file name
     }
-  };
+  }
+
+  const match = encryptedFileName.match(regex);
+  if (match && match[1]) {
+    return match[1]; // Return the extracted original file name
+  }
+}
+
+const handleDecrypt = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      console.log("1");
+      console.log("user: ", user);
+      const idToken = await user.getIdToken();
+      if (files.length === 0) {
+        throw new Error('No file selected for decryption.');
+      }
+      console.log("2");
+
+      const file = files[0]; // Assuming single file decryption
+      const fileArrayBuffer = await file.arrayBuffer();
+      console.log("3");
+
+      const cleanedKey = keyInput.trim();
+
+      // Convert hex input to Uint8Array for key and IV
+      const keyArray = hexToUint8Array(cleanedKey.trim());
+      const [ciphertext, ivHex] = tokenInput.split(':');
+      const iv = hexToUint8Array(ivHex.trim());
+
+      // Import the AES key
+      const cryptoKey = await crypto.subtle.importKey(
+        "raw",
+        keyArray,
+        { name: "AES-CTR" },
+        false,
+        ["decrypt"]
+      );
+      console.log("6");
+
+      // Decrypt the file content
+      const decryptedArrayBuffer = await crypto.subtle.decrypt(
+        {
+          name: "AES-CTR",
+          counter: iv,
+          length: 128, // Block size (128 bits for AES-CTR)
+        },
+        cryptoKey,
+        fileArrayBuffer
+      );
+      console.log("7");
+
+      // Create a downloadable file
+      const decryptedBlob = new Blob([decryptedArrayBuffer], { type: file.type });
+      console.log("8");
+      const url = URL.createObjectURL(decryptedBlob);
+      console.log("9");
+
+      const link = document.createElement('a');
+      link.href = url;
+      const cleanFileName = nameCleaner(file.name)
+      console.log("cleanFileName: ", cleanFileName)
+      link.download = cleanFileName
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      console.log("10");
+
+      // Release object URL after download
+      URL.revokeObjectURL(url);
+      
+            const response = await fetch('https://filecloak4.vercel.app/api/decrypt', {
+            // const response = await fetch('http://localhost:4000/api/decrypt', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${idToken}` // Send Firebase auth token
+                },
+                body: JSON.stringify({ encryptedText: tokenInput, key: keyInput }),
+              });
+      
+              const data = await response.json();
+              console.log("2");
+      
+              if (response.ok) {
+                // Create and download the `.txt` file with the decrypted fileNote
+                const decryptedNote = data.decryptedText
+                const fileNoteBlob = new Blob([decryptedNote], { type: 'text/plain' });
+                const fileNoteUrl = URL.createObjectURL(fileNoteBlob);
+                const fileNoteLink = document.createElement('a');
+                fileNoteLink.href = fileNoteUrl;
+                fileNoteLink.download = `${cleanFileName}_note.txt`; // Name the note file
+                document.body.appendChild(fileNoteLink);
+                fileNoteLink.click();
+                document.body.removeChild(fileNoteLink);
+                URL.revokeObjectURL(fileNoteUrl);
+              }
+      
+
+      console.log("11");
+      setLoading(false);
+      alert('File decrypted successfully!');
+    }
+    
+  } catch (error) {
+    console.error('Error during decryption:', error);
+    alert('Error during decryption. Please check your key and token.');
+    setLoading(false);
+  }
+};
+
 
   const logOut = async () => {
     signOut(auth)
@@ -140,6 +235,18 @@ function AdminPageDecrypt() {
     document.body.removeChild(link);
   };
 
+  const handleFileChange = (event) => {
+    const selectedFiles = event.target.files;
+    setFiles(selectedFiles);
+    
+    // Update file names using state
+    const fileNamesArray = Array.from(selectedFiles).map(file => file.name).join(', ');
+    setFileNames(fileNamesArray);
+
+    // Initialize file notes based on the number of selected files
+    setFileNotes(Array.from(selectedFiles).map(() => '')); // Create an array of empty strings
+  };
+
   return (
     <div className="decrypt-body">
       <div className="decrypt-container">
@@ -148,7 +255,7 @@ function AdminPageDecrypt() {
           <br />
         </div>
         <header>
-          <img src={FileCloak} className="decrypt-logo" alt="FileCloak" />
+          <img src={FileCloak} className="decrypt-logo" alt="FileCloak" onClick={() => navigate('/decrypttext')}/>
         </header>
         {role === 'admin' && (
           <form className="decrypt-form" onSubmit={handleDecrypt}>
@@ -162,7 +269,34 @@ function AdminPageDecrypt() {
                     <button type="button" className="list-btn" onClick={() => navigate('/datalist')}>Move to List</button><br/>
                   </div>
               </div>
+              
               <div className="file-decryption">
+                <div>
+                  <button
+                    type="button"
+                    className="decrypt-text-btn"
+                    id="decryptTextButton"
+                    onClick={() => navigate('/decrypttext')}
+                  >
+                    Decrypt Text
+                  </button>
+                  <br />
+                </div>
+                <div className="file-input-div">
+                  <div className="drop-area" id="dropArea">
+                    {!fileNames && <p>Drag and drop files or click to select</p>}
+                    <input
+                      className="file-input"
+                      type="file"
+                      id="fileInput"
+                      name="file"
+                      multiple
+                      required
+                      onChange={handleFileChange}
+                    />
+                    {fileNames && <p>Files Selected: {fileNames}</p>}
+                  </div>
+              </div>
                 <h2 className='header2'>Input Key</h2>
                 <input
                   type="text"

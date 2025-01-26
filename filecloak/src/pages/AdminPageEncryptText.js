@@ -23,7 +23,7 @@ const db = getFirestore(firebaseApp); // Firestore instance
 function AdminPageEncryptText() {
   const navigate = useNavigate();
   const [textToEncrypt, setTextToEncrypt] = useState('');
-  const [key, setKey] = useState('');
+  const [encryptionKey, setEncryptionKey] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [role, setRole] = useState(''); // State to store user role
@@ -70,7 +70,7 @@ function AdminPageEncryptText() {
   const handleEncrypt = async (event) => {
     event.preventDefault();
     
-    if (!textToEncrypt || !key) {
+    if (!textToEncrypt || !encryptionKey) {
       setError('Please enter both text and key.');
       return;
     }
@@ -87,7 +87,7 @@ function AdminPageEncryptText() {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${idToken}` // Send Firebase auth token
           },
-          body: JSON.stringify({ text: textToEncrypt, key }),
+          body: JSON.stringify({ text: textToEncrypt, key: encryptionKey }),
         });
 
         const data = await response.json();
@@ -120,6 +120,17 @@ function AdminPageEncryptText() {
             <form className="encrypt-text-form" onSubmit={handleEncrypt}>
               <div className="encrypt-text-panel">
                 <div className="file-encryption">
+                  <div>
+                    <button
+                      type="button"
+                      className="encrypt-text-btn"
+                      id="encryptTextButton"
+                      onClick={() => navigate('/encryptfile')}
+                    >
+                      Encrypt File
+                    </button>
+                    <br />
+                  </div>
                   <h2>Input Text</h2>
                   <div>
                     <textarea
@@ -139,12 +150,12 @@ function AdminPageEncryptText() {
                       cols="50"
                       maxLength="64"
                       placeholder="You can also input a 64 character long key"
-                      value={key}
-                      onChange={(e) => setKey(e.target.value)}
+                      value={encryptionKey}
+                      onChange={(e) => setEncryptionKey(e.target.value)}
                     /><br/>
-                    <p className='counter-tracker'><span id="counter">{key.length}</span> / 64 characters</p>
-                    <button id="keyGenButton" type="button" onClick={() => setKey(generateKey())}>Generate Key</button><br/>
-                    <button id="copyButton" type="button" onClick={() => navigator.clipboard.writeText(key)}>Copy to Clipboard</button>
+                    <p className='counter-tracker'><span id="counter">{encryptionKey.length}</span> / 64 characters</p>
+                    <button id="keyGenButton" type="button" onClick={() => setEncryptionKey(generateKey())}>Generate Key</button><br/>
+                    <button id="copyButton" type="button" onClick={() => navigator.clipboard.writeText(encryptionKey)}>Copy to Clipboard</button>
                   </div>
                   <div>
                     <textarea

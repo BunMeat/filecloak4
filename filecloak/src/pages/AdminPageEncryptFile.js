@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut } from 'firebase/auth'; // Import Firebase auth functions
-import { getFirestore, doc, getDoc } from 'firebase/firestore'
+import { getFirestore, doc, getDoc, setDoc, collection } from 'firebase/firestore'
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import FileCloak from '../FileCloak.webp';
 import './AdminPageEncryptFile.css';
-import CryptoJS from 'crypto-js';
 import { initializeApp } from 'firebase/app';
+import CryptoJS from 'crypto-js';
+import JSZip from 'jszip';
+import pako from 'pako';
 
 
 // Firebase configuration
@@ -28,10 +31,13 @@ function AdminPageEncryptFile() {
   const [note, setNote] = useState(''); // State for a single note input
   const [files, setFiles] = useState([]);
   const [zipFiles, setZipFiles] = useState(false);
-  const [encryptedLinks, setEncryptedLinks] = useState([]);
+  const [links, setLinks] = useState([]);
+  const [encryptionToken, setEncryptionToken] = useState([]);
   const [error, setError] = useState('');
   const [fileNames, setFileNames] = useState(''); // State for displaying file names
-  const [fileNotes, setFileNotes] = useState([]); // State to hold notes for each file
+  const [uniqueFileName, setUniqueFileName] = useState(''); // State for displaying file names
+  const [fileNote, setFileNote] = useState([]); // State to hold notes for each file
+  const [encryptedFileNote, setEncryptedFileNote] = useState([]);
   const [role, setRole] = useState(''); // State to store user role
 
   useEffect(() => {
@@ -62,6 +68,12 @@ function AdminPageEncryptFile() {
 
     return () => unsubscribe();})
 
+    const setupStorage = async () => {
+      // Initialize storage and validate other preconditions
+      const storage = getStorage(firebaseApp); // Ensure firebaseApp is initialized earlier
+      return storage;
+    };
+
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
@@ -82,55 +94,225 @@ function AdminPageEncryptFile() {
     setFileNames(fileNamesArray);
 
     // Initialize file notes based on the number of selected files
-    setFileNotes(Array.from(selectedFiles).map(() => '')); // Create an array of empty strings
+    setFileNote(Array.from(selectedFiles).map(() => '')); // Create an array of empty strings
   };
+
+  const encryptData = async (data, key) => {
+    // Generate a random IV
+    const iv = crypto.getRandomValues(new Uint8Array(16));
+    console.log("iv", iv)
+    
+    // Encrypt the data
+    const encryptedData = await crypto.subtle.encrypt(
+      {
+        name: "AES-CTR",
+        counter: iv,
+        length: 128, // Counter length (must be 128 bits for AES-CTR)
+      },
+      key,
+      data
+    );
+    const ivHex = Array.from(iv).map(byte => byte.toString(16).padStart(2, '0')).join('');
+    console.log("ivHex: ", ivHex)
+
+    return {encryptedData, iv, ivHex};
+  };
+
+  const processFilesForUpload = async (files, zipFiles, encryptionKeyString) => {
+
+    const formData = new FormData();
+    const ivs = []; // Array to store IVs for each file
+    const ivHexs = []
+    const mimeTypes = []; // Array to store MIME types for each file
+  
+    // Convert encryption key string to CryptoKey
+    const rawKey = new Uint8Array(
+      encryptionKeyString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
+    );
+    const encryptionKey = await crypto.subtle.importKey(
+      "raw",
+      rawKey,
+      { name: "AES-CTR" },
+      false,
+      ["encrypt"]
+    );
+  
+    if (zipFiles == true) {
+      // Zip files
+      const zip = new JSZip();
+      Array.from(files).forEach((file) => {
+        zip.file(file.name, file);
+      });
+    
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+
+    
+      // Convert Blob to ArrayBuffer
+      const zipArrayBuffer = await zipBlob.arrayBuffer();
+
+      // Encrypt the zipped file
+      const { encryptedData, iv, ivHex } = await encryptData(
+        zipArrayBuffer,
+        encryptionKey
+      );
+      ivs.push(iv); // Store the IV for zipped file
+      ivHexs.push(ivHex); // Store the IV for zipped file
+      mimeTypes.push("application/x-zip-compressed");
+      const randomString = Math.random().toString(36).substring(2, 8); // 6-character random string
+    
+      // Convert the encrypted data to a Blob and append it to the formData
+      const encryptedBlob = new Blob([encryptedData]);
+      const uniqueFilename = `encrypted_files.zip-${randomString}.enc`;
+      formData.append("files", encryptedBlob, uniqueFilename);
+      formData.append(
+        "iv",
+        Array.from(iv)
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("")
+      );
+      formData.append("mimeType", "application/x-zip-compressed");
+    } else {
+      // Encrypt each file
+      for (const file of files) {
+        const fileArrayBuffer = await file.arrayBuffer();
+        const { encryptedData, iv, ivHex } = await encryptData(
+          fileArrayBuffer,
+          encryptionKey
+        );
+        ivs.push(iv); // Store the IV for zipped file
+        ivHexs.push(ivHex); // Store the IV for zipped file
+        mimeTypes.push(file.type);
+        const randomString = Math.random().toString(36).substring(2, 8); // 6-character random string
+
+        // Construct unique file path
+        const uniqueFilename = `${file.name}-${randomString}.enc`;
+
+        // Convert encrypted data to a Blob and append it to the formData
+        const encryptedBlob = new Blob([encryptedData], { type: file.type });
+        formData.append("files", encryptedBlob, uniqueFilename);
+
+        formData.append(`iv-${file.name}`, ivHex); // Append IV for the file
+        formData.append(`mimeType-${file.name}`, file.type); // Append MIME type for the file
+      }
+    }
+  
+    return { formData, ivs, ivHexs, mimeTypes }; // Return both formData and IVs
+  };
+  
 
   const handleEncrypt = async (event) => {
     event.preventDefault();
-  
-    if (!files || files.length === 0) {
-      setError('Please select files to upload.');
-      return;
-    }
-  
+    const linkArray = []; // Temporary array to hold encrypted links
+    const ivHexArray = []
+    const uniqueFileNameArray = []
+    const encryptionTokens = []
     if (!encryptionKey) {
       setError('Please provide an encryption key.');
       return;
     }
   
     try {
-      const user = auth.currentUser; // Get the current user
+      const user = auth.currentUser;
       if (user) {
-        const idToken = await user.getIdToken(); // Get the ID token
-  
-        const formData = new FormData();
-        for (const file of files) {
-          formData.append('files', file);
+        const idToken = await user.getIdToken();
+        const storage = await setupStorage(); // Ensure storage is ready before proceeding
+
+            // Convert FileList to an array for processing
+            console.log("10;")
+        const filesArray = Array.from(files);
+        const { formData, ivs, ivHexs, mimeTypes } = await processFilesForUpload(files, zipFiles, encryptionKey);
+        
+
+      // Upload encrypted files to Firebase Storage
+      for (const [key, value] of formData.entries()) {
+        if (key.startsWith("files")) {
+      
+          if (value instanceof File || value instanceof Blob) {
+            try {
+               // Extract original filename and generate random string
+                const filePath = `uploads/${user.email}/${value.name}`;
+                console.log("filePath", filePath);
+        
+                const storageRef = ref(storage, filePath);
+        
+                // Upload file with MIME type metadata
+                const metadata = { contentType: value.type, contentDisposition: 'attachment', };
+                const uploadSnapshot = await uploadBytes(storageRef, value, metadata);
+        
+                const downloadURL = await getDownloadURL(storageRef);
+        
+                const index = [...formData.keys()].indexOf(key); // Get the current index
+                const iv = ivs[index];
+                const ivHex = ivHexs[index];
+                const mimeType = mimeTypes[index];
+                const noteToEncrypt = (typeof fileNote === 'string' && fileNote.trim()) 
+                ? fileNote 
+                : 'There is no note attached';
+
+                  const response = await fetch('https://filecloak4.vercel.app/api/encryptfile', {
+                  // const response = await fetch('http://localhost:4000/api/encryptfile', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${idToken}` // Send Firebase auth token
+                    },
+                    body: JSON.stringify({ text: noteToEncrypt, key: encryptionKey, iv: ivHex }),
+                  });
+          
+                  const data = await response.json();
+          
+                  if (response.ok) {
+                    linkArray.push(downloadURL); // Add to the array
+                    ivHexArray.push(ivHex);
+                    const dateUploaded = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).replace(' ', 'T');// Current timestamp
+                    const fileName = value.name; // Assuming `value.name` contains the filename
+                    uniqueFileNameArray.push(fileName);
+                    // Upload data to Firestore
+                    const userFilesCollectionRef = collection(db, "users", user.email, "files"); // Path: users/{user.email}/files
+
+                    const fileDocRef = doc(userFilesCollectionRef, `${ivHex}`); // Document ID: dateUploaded-fileName
+
+                    console.log("EncryptedFileNote: ", data.encryptedText)
+                    const encryptedNote = data.encryptedText
+                    await setDoc(fileDocRef, {
+                      fileUrl: downloadURL,
+                      fileName: fileName,
+                      fileType: mimeType,
+                      dateUploaded: dateUploaded,
+                      encryptedNote: encryptedNote,
+                      uploadedBy: user.email, // Optionally store the user who uploaded the file
+                    });
+                    const encryptionToken = encryptedNote + ':' + ivHex
+                    encryptionTokens.push(encryptionToken)
+                    // Trigger file download after successfully storing data in Firestore
+                    // try {
+                    //   const response = await fetch(downloadURL); // Fetch the file
+                    //   const blob = await response.blob(); // Convert to Blob
+
+                    //   const link = document.createElement("a");
+                    //   link.href = URL.createObjectURL(blob);
+                    //   link.download = fileName; // Set correct file name
+                    //   document.body.appendChild(link);
+                    //   link.click();
+                    //   document.body.removeChild(link);
+                    // } catch (downloadError) {
+                    //   console.error("Failed to download the encrypted file:", downloadError);
+                    // }
+                    setError('');
+                  } else {
+                    setError(data.error);
+                  }             
+                
+            } catch (error) {
+              console.error("Error during upload or encryption. Please refresh the page:", error);
+            }
+          }
         }
-        formData.append('key', encryptionKey);
-        formData.append('zipFiles', zipFiles);
-  
-        // Include file notes in the form data
-        fileNotes.forEach((note, index) => {
-          formData.append(`note_${index}`, note); // Append each note with a unique key
-        });
-  
-        const response = await fetch('https://filecloak4.vercel.app/api/encryptfile', {
-        // const response = await fetch('http://localhost:4000/api/encryptfile', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${idToken}`, // Include ID token in the Authorization header
-          },
-          body: formData,
-        });
-        const data = await response.json();
-  
-        if (response.ok) {
-          setEncryptedLinks(data.encryptedLinks);
-          setError('');
-        } else {
-          setError(data.message);
-        }
+      }
+
+      setLinks(linkArray);
+      setEncryptionToken(encryptionTokens);
+      setUniqueFileName(uniqueFileNameArray)
       } else {
         setError('User is not authenticated.');
       }
@@ -138,22 +320,52 @@ function AdminPageEncryptFile() {
       setError('An error occurred: ' + error.message);
     }
   };
+  
 
   const handleKeyChange = (event) => {
-    const key = event.target.value.slice(0, 64);
+    const key = event.target.value.slice(0, 64); // Limit to 64 characters
     setEncryptionKey(key);
   };
+
+const generateEncryptionKey = async () => {
+  // Generate the encryption key
+  const key = await crypto.subtle.generateKey(
+    { name: "AES-CTR", length: 256 },
+    true, // Exportable key
+    ["encrypt", "decrypt"]
+  );
+
+  // Export the key as raw data
+  const exportedKey = await crypto.subtle.exportKey("raw", key);
+
+  // Convert the raw key to a string (e.g., hexadecimal)
+  const keyAsHex = Array.from(new Uint8Array(exportedKey))
+    .map(byte => byte.toString(16).padStart(2, '0')) // Convert each byte to hex
+    .join('');
+
+  return keyAsHex; // Return the key as a string
+};
+
+const handleGenerateKey = async () => {
+  const generatedKey = await generateEncryptionKey();
+  setEncryptionKey(generatedKey); // Update the textarea with the new key
+};
 
   const handleZipCheckboxChange = () => {
     setZipFiles(!zipFiles); // Toggle the checkbox state
   };
 
   const exportToTxt = () => {
-    const fileData = encryptedLinks.map((link, index) => {
-      const fileName = files[index]?.name || `File ${index + 1}`;
-      return `File Name: ${fileName}\nEncrypted Token: ${link}\n`;
+    // Convert FileList to an array
+    const fileArray = Array.from(files);
+  
+    const fileData = fileArray.map((file, index) => {
+      const fileName = uniqueFileName || `File ${index + 1}`;
+      const encryptedToken = encryptionToken[index] || 'N/A'; // Get the corresponding encryption token
+      const fileLink = links[index] || 'N/A'; // Get the corresponding encrypted link
+      return `File Name: ${fileName}\nEncryption Token: ${encryptedToken}\nFile Download Link: ${fileLink}\n`;
     }).join('\n');
-    
+  
     const exportContent = `Encryption Key: ${encryptionKey}\n\n${fileData}`;
     const blob = new Blob([exportContent], { type: 'text/plain' });
     const link = document.createElement('a');
@@ -161,11 +373,11 @@ function AdminPageEncryptFile() {
     link.download = 'encryptedFilesInfo.txt';
     link.click();
   };
+  
 
-  const handleNoteChange = (index, value) => {
-    const newFileNotes = [...fileNotes];
-    newFileNotes[index] = value; // Update the note for the specific file
-    setFileNotes(newFileNotes);
+  const handleNoteChange = (value) => {
+    const fileNote = value; // Update the note for the specific file
+    setFileNote(fileNote);
   };
 
   return (
@@ -189,8 +401,7 @@ function AdminPageEncryptFile() {
           <form className="encrypt-file-form" onSubmit={handleEncrypt}>
             <div className="encrypt-file-panel">
               <div className="file-encryption">
-                <h2 className='header2'>Input File</h2>
-                <div>
+              <div>
                   <button
                     type="button"
                     className="encrypt-text-btn"
@@ -201,6 +412,7 @@ function AdminPageEncryptFile() {
                   </button>
                   <br />
                 </div>
+                <h2 className='header2'>Input File</h2>
                 <div className="file-input-div">
                   <div className="drop-area" id="dropArea">
                     {!fileNames && <p>Drag and drop files or click to select</p>}
@@ -249,7 +461,7 @@ function AdminPageEncryptFile() {
                     className='keygen-btn'
                     id="keyGenButton"
                     type="button"
-                    onClick={() => setEncryptionKey(CryptoJS.lib.WordArray.random(64).toString())}
+                    onClick={handleGenerateKey}
                   >
                     Generate Key
                   </button>
@@ -263,32 +475,41 @@ function AdminPageEncryptFile() {
                     Copy to Clipboard
                   </button>
                 </div>
-                
-                {/* Render textareas for notes based on the number of files */}
-                {files.length > 0 && (
-                  <div>
-                    <h3>Notes for Files</h3>
-                    {Array.from(files).map((_, index) => (
-                      <div key={index}>
-                        <label>Note for {files[index].name}:</label>
-                        <textarea
-                          rows="3"
-                          cols="50"
-                          value={fileNotes[index]}
-                          onChange={(e) => handleNoteChange(index, e.target.value)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="note-section">
+                <h3>Notes for Files</h3>
+                    <textarea
+                      rows="3"
+                      cols="50"
+                      value={fileNote}
+                      onChange={(e) => handleNoteChange(e.target.value)}
+                    />
+                </div>
 
                 <button type="submit" className="encrypt-btn" id="encryptButton">
                   Encrypt
                 </button>
                 {error && <p className="error-message">{error}</p>}
-                {encryptedLinks.length > 0 && (
+                {encryptionToken.length > 0 && (
                   <div>
-                    {encryptedLinks.map((link, index) => (
+                    {encryptionToken.map((iv, index) => (
+                      <div key={index}>
+                        <textarea
+                          rows="3"
+                          cols="80"
+                          value={iv}
+                          readOnly
+                          className="encrypted-links-textarea"
+                        />
+                        <button
+                          className="copy-btn"
+                          type="button"
+                          onClick={() => navigator.clipboard.writeText(iv)}
+                        >
+                          Copy to Clipboard
+                        </button>
+                      </div>
+                    ))}
+                    {/* {links.map((link, index) => (
                       <div key={index}>
                         <textarea
                           rows="3"
@@ -305,7 +526,9 @@ function AdminPageEncryptFile() {
                           Copy to Clipboard
                         </button>
                       </div>
-                    ))}
+                    ))} */}
+
+
 
                     {/* Export to TXT button */}
                     <button className="export-btn" type="button" onClick={exportToTxt}>

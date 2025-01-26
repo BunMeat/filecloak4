@@ -91,7 +91,7 @@ button:focus {
     margin-bottom: 10px;
 }
 
-.panel {
+.user-panel {
     width: 450px;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
