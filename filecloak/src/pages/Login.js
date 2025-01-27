@@ -32,8 +32,9 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const email = event.target.emailLogin.value;
+    const revisedEmail = email.toLowerCase()
     const password = event.target.passwordLogin.value;
-    const userDocRef = doc(firestore, 'users', email);
+    const userDocRef = doc(firestore, 'users', revisedEmail);
     const userDoc = await getDoc(userDocRef);
     const userData = userDoc.data();
 
@@ -50,7 +51,7 @@ function Login() {
       }
 
       // Firebase Auth Sign-In
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, revisedEmail, password);
       const idToken = await userCredential.user.getIdToken(); // Get ID token if needed
 
       // Reset attemptNo on successful login

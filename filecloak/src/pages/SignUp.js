@@ -13,6 +13,7 @@ function SignUp() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const email = event.target.email.value;
+    const revisedEmail = email.toLowerCase()
     const password = event.target.password.value;
     const repeatPassword = event.target.repeatPassword.value;
 
@@ -23,7 +24,7 @@ function SignUp() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, repeatPassword }),
+        body: JSON.stringify({ revisedEmail, password, repeatPassword }),
       });
 
       if (response.ok) {
