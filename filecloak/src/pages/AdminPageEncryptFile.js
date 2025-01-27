@@ -412,7 +412,7 @@ const handleGenerateKey = async () => {
                   </button>
                   <br />
                 </div>
-                <h2 className='header2'>Input File</h2>
+                <h2 className='firstheader2'>Input File</h2>
                 <div className="file-input-div">
                   <div className="drop-area" id="dropArea">
                     {!fileNames && <p>Drag and drop files or click to select</p>}
@@ -447,7 +447,7 @@ const handleGenerateKey = async () => {
                     className='counter'
                     id="keyGen"
                     rows="3"
-                    cols="60"
+                    cols="50"
                     placeholder="You can also input a 64 character long key"
                     maxLength="64"
                     value={encryptionKey}
@@ -509,7 +509,7 @@ const handleGenerateKey = async () => {
                         </button>
                       </div>
                     ))}
-                    {/* {links.map((link, index) => (
+                    {links.map((link, index) => (
                       <div key={index}>
                         <textarea
                           rows="3"
@@ -526,7 +526,7 @@ const handleGenerateKey = async () => {
                           Copy to Clipboard
                         </button>
                       </div>
-                    ))} */}
+                    ))}
 
 
 
