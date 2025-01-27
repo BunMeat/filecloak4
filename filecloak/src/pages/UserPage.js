@@ -78,8 +78,6 @@ function UserPage() {
 
 const nameCleaner = (encryptedFileName) => {
   const regex = /(.+)-[\w\d]+\.enc$/; // Matches the name before the last hyphen and ".enc"
-  
-  console.log("encryptedFileName: ", encryptedFileName);
 
   if (encryptedFileName.endsWith('.jpeg')) {
     // Find the part before the last hyphen and ".jpeg"
@@ -123,7 +121,6 @@ const handleDecrypt = async (e) => {
         false,
         ["decrypt"]
       );
-      console.log("6");
 
       // Decrypt the file content
       const decryptedArrayBuffer = await crypto.subtle.decrypt(
@@ -135,13 +132,10 @@ const handleDecrypt = async (e) => {
         cryptoKey,
         fileArrayBuffer
       );
-      console.log("7");
 
       // Create a downloadable file
       const decryptedBlob = new Blob([decryptedArrayBuffer], { type: file.type });
-      console.log("8");
       const url = URL.createObjectURL(decryptedBlob);
-      console.log("9");
 
       const link = document.createElement('a');
       link.href = url;
@@ -151,8 +145,6 @@ const handleDecrypt = async (e) => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      console.log("10");
-
       // Release object URL after download
       URL.revokeObjectURL(url);
       
@@ -165,11 +157,8 @@ const handleDecrypt = async (e) => {
                 },
                 body: JSON.stringify({ encryptedText: tokenInput, key: keyInput }),
               });
-              console.log("h")
       
               const data = await response.json();
-              console.log("i")
-              console.log("2");
       
               if (response.ok) {
                 // Create and download the `.txt` file with the decrypted fileNote
@@ -184,9 +173,7 @@ const handleDecrypt = async (e) => {
                 document.body.removeChild(fileNoteLink);
                 URL.revokeObjectURL(fileNoteUrl);
               }
-      
-
-      console.log("11");
+  
       setLoading(false);
       alert('File decrypted successfully!');
     }

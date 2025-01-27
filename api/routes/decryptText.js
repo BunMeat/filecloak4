@@ -21,7 +21,6 @@ function decrypt(encryptedText, key) {
 // Route to handle text decryption
 router.post('/', async (req, res) => {
   const { encryptedText, key } = req.body;
-  console.log("req.body: ", req.body)
 
   if (!encryptedText || !key) {
     return res.status(400).json({ error: 'Encrypted text and key are required' });
@@ -29,7 +28,6 @@ router.post('/', async (req, res) => {
 
   try {
     const decryptedText = decrypt(encryptedText, key);
-    console.log("decryptedText: ", decryptedText)
     res.status(200).json({ decryptedText });
   } catch (error) {
     console.error('Decryption failed', error);

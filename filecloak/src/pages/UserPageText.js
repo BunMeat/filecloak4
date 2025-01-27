@@ -83,16 +83,13 @@ const handleDecrypt = async (e) => {
         },
         body: JSON.stringify({ encryptedText: textToDecrypt, key }),
       });
-      console.log("1");
 
       const data = await response.json();
 
       if (response.ok) {
-        console.log("2")
         setOutput(data.decryptedText); // Set the encrypted text in the output
         setError('');
       } else {
-        console.log("3")
         setError(data.error);
       }
     } else {

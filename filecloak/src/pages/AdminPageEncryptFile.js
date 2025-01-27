@@ -100,7 +100,6 @@ function AdminPageEncryptFile() {
   const encryptData = async (data, key) => {
     // Generate a random IV
     const iv = crypto.getRandomValues(new Uint8Array(16));
-    console.log("iv", iv)
     
     // Encrypt the data
     const encryptedData = await crypto.subtle.encrypt(
@@ -113,7 +112,6 @@ function AdminPageEncryptFile() {
       data
     );
     const ivHex = Array.from(iv).map(byte => byte.toString(16).padStart(2, '0')).join('');
-    console.log("ivHex: ", ivHex)
 
     return {encryptedData, iv, ivHex};
   };
@@ -216,9 +214,6 @@ function AdminPageEncryptFile() {
       if (user) {
         const idToken = await user.getIdToken();
         const storage = await setupStorage(); // Ensure storage is ready before proceeding
-
-            // Convert FileList to an array for processing
-            console.log("10;")
         const filesArray = Array.from(files);
         const { formData, ivs, ivHexs, mimeTypes } = await processFilesForUpload(files, zipFiles, encryptionKey);
         
@@ -231,7 +226,6 @@ function AdminPageEncryptFile() {
             try {
                // Extract original filename and generate random string
                 const filePath = `uploads/${user.email}/${value.name}`;
-                console.log("filePath", filePath);
         
                 const storageRef = ref(storage, filePath);
         
