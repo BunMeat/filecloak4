@@ -125,7 +125,7 @@ const handleDecrypt = async (e) => {
           <img src={FileCloak} className="userpagetext-logo" alt="FileCloak" />
         </header>
         {role === 'user' && (
-          <form className="decrypt-form" onSubmit={handleDecrypt}>
+          <form className="userpagetext-decrypt-form" onSubmit={handleDecrypt}>
             <div className="userpagetext-panel">
               <div className="file-decryption">
                 <div>
@@ -139,7 +139,7 @@ const handleDecrypt = async (e) => {
                   </button>
                   <br />
                 </div>
-                <h2 className='header2'>Input Key</h2>
+                <h2 className='firstheader2'>Input Key</h2>
                 <input
                   type="text"
                   className='userpagetext-key-input'

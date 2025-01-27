@@ -131,7 +131,7 @@ function AdminPageEncryptText() {
                     </button>
                     <br />
                   </div>
-                  <h2>Input Text</h2>
+                  <h2 className='firstheader2'>Input Text</h2>
                   <div>
                     <textarea
                       id="textToEncrypt"

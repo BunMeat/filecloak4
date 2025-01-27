@@ -3,131 +3,139 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Arial', sans-serif;
+    font-size: 10px;
 }
 
 .encrypt-file-body {
     height: 100vh;
     background-color: #BED8D4;
-    overflow: hidden;
+    overflow-y: auto; /* Allow vertical scrolling */
 }
 
 .encrypt-file-container {
     width: 80%;
-    margin: 50px auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 10px;
+    border-radius: 6px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
     position: relative;
 }
 
 .encrypt-file-logo {
-    width: 200px;
-    margin-bottom: 20px;
+    width: 120px;
+    margin-bottom: 10px;
 }
 
 .encrypt-file-panel {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    align-items: start;
+    gap: 10px;
 }
 
 .file-encryption {
     background: #f8f8f8;
-    padding: 20px;
-    border-radius: 8px;
+    padding: 8px; /* Smaller padding */
+    border-radius: 3px; /* Smaller rounded corners */
+    width: 100%; /* Ensures both elements have the same width */
 }
 
 .logout-btn {
     position: absolute;
     top: 20px;
     right: 20px;
-    padding: 10px;
+    padding: 4px; /* Smaller padding */
+    border-radius: 2px; /* Smaller rounded corners */
     border: none;
-    border-radius: 5px;
-    background-color: #f44336;
-    color: white;
-    font-size: 16px;
+    background: #f44336;
+    color: #fff;
+    font-size: 10px; /* Smaller font size */
     cursor: pointer;
+    width: 60px;
+    height: 25px;
 }
 
 .header2 {
-    margin-bottom: 15px;
+    margin-bottom: 8px;
     color: #333;
+    font-size: 18px;
 }
 
+.firstheader2 {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 18px;
+}
 
 .file-input-div {
     display: flex;
-    align-items: center; /* Align items vertically centered */
-    margin-bottom: 20px;
+    align-items: center;
+    margin-bottom: 10px;
     position: relative;
-  }
+}
 
 .zip-checkbox-container {
-    flex: 1; /* Smaller proportion */
-    margin-left: 10px; /* Add some spacing between drop-area and checkbox */
+    flex: 1;
+    margin-left: 6px;
 }
 
 .file-input {
-    position: absolute; /* Make it absolute to overlay only the drop-area */
-    opacity: 0; /* Hide the file input */
-    width: 100%;
+    position: absolute;
+    opacity: 0;
+    width: 50%;
     height: 100%;
     cursor: pointer;
     z-index: 1;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
 }
 
 .drop-area {
-    flex: 3; /* Larger proportion to take up more space */
+    flex: 2;
     border: 2px dashed #aaa;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    padding: 20px; /* Add some padding for better visual appearance */
-    background-color: rgba(255, 255, 255, 0.7); /* Optional: To make the drop area slightly translucent */
-    position: relative; /* Required for positioning the file input */
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.7);
+    position: relative;
 }
 
-  
-.encrypt-text-btn, .encrypt-btn, .decrypt-btn, .list-btn {
+.encrypt-text-btn,
+.encrypt-btn,
+.decrypt-btn,
+.list-btn {
     width: 100%;
-    padding: 10px;
+    padding: 5px; /* Reduce padding */
     border: none;
-    border-radius: 5px;
-    color: white;
-    font-size: 16px;
+    border-radius: 2px; /* Smaller rounded corners */
+    color: #fff;
+    font-size: 10px; /* Smaller font size */
     cursor: pointer;
 }
 
 .encrypt-btn {
-    background-color: #4CAF50;
+    background: #4CAF50;
 }
 
 .decrypt-btn {
-    background-color: #f44336;
+    background: #f44336;
 }
 
 .encrypt-text-btn {
-    background-color: dimgray;
+    background: dimgray;
 }
 
 .list-btn {
-    background-color: #454343;
+    background: #454343;
 }
 
 .counter-tracker {
-    font-size: 10px;
+    font-size: 8px;
 }
 
 .button:hover {
@@ -138,21 +146,12 @@ button:focus {
     outline: none;
 }
 
-/* .drop-area {
-    border: 2px dashed #cccccc;
-    padding: 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.3s;
-} */
-
 .drop-area.dragging {
-    background-color: #f1f1f1;
+    background: #f1f1f1;
 }
 
-
 @media (max-width: 768px) {
-    .panel {
+    .encrypt-file-panel {
         grid-template-columns: 1fr;
     }
 }

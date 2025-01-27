@@ -5,24 +5,25 @@
   font-family: 'Montserrat', sans-serif;
 }
 
-.homepage-body{
-  max-width: auto;
-  height: 100vh;
+.homepage-body {
+  min-height: 100vh; /* Ensure full viewport height is covered */
   background: linear-gradient(135deg, #E0F7FA 0%, #80DEEA 100%);
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: auto;
 }
 
 .HomePage {
-  max-width: 695px;
+  transform: scale(0.9); /* Shrinks the entire container */
+  max-width: 90%; /* Keeps it responsive */
   background-color: #ffffff;
-  padding: 30px;
+  padding: 20px; /* Reduce padding for a smaller look */
   border-radius: 15px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   text-align: center;
-  position: relative;
 }
 
 .homepage-header {
@@ -30,7 +31,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px; /* Reduce spacing */
 }
 
 .HomePage-logo {
@@ -40,41 +41,45 @@
 .homepage-nav {
   display: flex;
   gap: 10px;
+  margin-right: 20px;
 }
 
 .intro {
   background: #f8f8f8;
-  padding: 20px;
-  border-radius: 15px;
-  margin-top: 20px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 15px; /* Reduce padding inside the intro */
+  border-radius: 10px;
+  margin-top: 15px;
+  font-size: 1em;
 }
 
 .homepage-welcome {
   font-size: 2em;
+  margin-bottom: 10px;
   color: #00796B;
-  margin-bottom: 15px;
   font-weight: 700;
 }
 
 .homepage-span {
+  font-size: 1em;
   color: #004D40;
 }
 
 .tagline {
-  font-size: 1em;
+  font-size: 1.3em; /* Shrink tagline */
+  margin-bottom: 15px;
   color: #004D40;
-  margin-bottom: 20px;
   font-weight: 600;
 }
 
 .description {
-  font-size: 0.9em;
+  font-size: 1em; /* Shrink description text */
   color: #555555;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .features {
+  gap: 15px; /* Adjust spacing */
   display: flex;
   justify-content: space-around;
   margin-bottom: 20px;
@@ -82,8 +87,8 @@
 }
 
 .feature {
-  font-size: 0.9em;
   color: #555555;
+  font-size: 1em; /* Shrink font size */
   display: flex;
   align-items: center;
   margin-bottom: 10px;
@@ -96,46 +101,43 @@
   color: #00796B;
 }
 
+.button-login,
+.button-signup,
+.button-encrypt-now {
+  font-size: 1em; /* Shrink button text */
+  height: 30px;
+  width: auto;
+  padding: 5px 15px; /* Adjust padding for smaller buttons */
+}
+
 .button-login {
-  padding: 10px 20px;
   border: none;
   border-radius: 25px;
   color: white;
-  font-size: 0.9em;
   cursor: pointer;
   background-color: #00796B;
   transition: background-color 0.3s ease;
   margin-top: 10px;
-  height: 35px;
-  width: 75px;
 }
 
 .button-signup {
-  padding: 10px 20px;
   border: none;
   border-radius: 25px;
   color: white;
-  font-size: 0.9em;
   cursor: pointer;
   background-color: #00796B;
   transition: background-color 0.3s ease;
   margin-top: 10px;
-  height: 35px;
-  width: 95px;
 }
 
 .button-encrypt-now {
-  padding: 10px 20px;
   border: none;
   border-radius: 25px;
   color: white;
-  font-size: 0.9em;
   cursor: pointer;
   background-color: #00796B;
   transition: background-color 0.3s ease;
   margin-top: 10px;
-  height: 38px;
-  width: 125px;
 }
 
 .button-login:hover {
@@ -167,19 +169,20 @@
   padding: 10px;
   border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  margin-top: 30px;
-  font-size: 0.8em;
+  padding: 10px; /* Shrink contact section padding */
+  font-size: 0.9em; /* Shrink text size */
+  margin-top: 20px;
 }
 
 .contact-us-h2 {
-  font-size: 1em;
   color: #00796B;
   margin-bottom: 10px;
   font-weight: 700;
+  font-size: 1em;
 }
 
 .contact-us p {
-  font-size: 0.8em;
+  font-size: 1em;
   color: #555555;
   margin-bottom: 5px;
 }
@@ -192,6 +195,14 @@
 
 .contact-us p a:hover {
   color: #004D40;
+}
+
+.button:hover {
+  opacity: 0.8;
+}
+
+button:focus {
+  outline: none;
 }
 
 @media (max-width: 768px) {

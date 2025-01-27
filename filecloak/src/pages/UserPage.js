@@ -254,7 +254,7 @@ const handleDecrypt = async (e) => {
           <img src={FileCloak} className="userpage-logo" alt="FileCloak" onClick={() => navigate('/decrypttext')}/>
         </header>
         {role === 'user' && (
-          <form className="decrypt-form" onSubmit={handleDecrypt}>
+          <form className="userpage-decrypt-form" onSubmit={handleDecrypt}>
             <div className="user-panel">
               
               <div className="file-decryption">

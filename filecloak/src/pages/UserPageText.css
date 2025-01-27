@@ -3,6 +3,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Arial', sans-serif;
+    font-size: 10px;
 }
 
 .userpagetext-body {
@@ -13,20 +14,24 @@
 
 .userpagetext-container {
     width: 80%;
-    margin: 50px auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
+    margin: 30px auto;
+    background: #fff;
+    padding: 10px;
+    border-radius: 6px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
     position: relative;
 }
 
 .userpagetext-logo {
-    width: 200px;
-    margin-bottom: 20px;
+    width: 120px;
+    margin-bottom: 10px;
+}
+
+.userpagetext-decrypt-form {
+    align-content: center;
 }
 
 .file-decryption {
@@ -36,14 +41,16 @@
 }
 
 .header2 {
-    margin-bottom: 15px;
+    margin-bottom: 8px;
     color: #333;
+    font-size: 18px;
 }
 
-.logoutButton {
-    position: absolute;
-    top: 20px;
-    right: 20px;
+.firstheader2 {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 18px;
 }
 
 .decrypt {
@@ -54,24 +61,23 @@
     position: absolute;
     top: 20px;
     right: 20px;
-    padding: 10px;
+    padding: 4px; /* Smaller padding */
+    border-radius: 2px; /* Smaller rounded corners */
     border: none;
-    border-radius: 5px;
-    background-color: #f44336;
-    color: white;
-    font-size: 16px;
+    background: #f44336;
+    color: #fff;
+    font-size: 10px; /* Smaller font size */
     cursor: pointer;
 }
 
 .decrypt-btn {
     width: 100%;
-    padding: 10px 20px;
+    padding: 5px; /* Reduce padding */
     border: none;
-    border-radius: 5px;
-    color: white;
-    font-size: 16px;
+    border-radius: 2px; /* Smaller rounded corners */
+    color: #fff;
+    font-size: 10px; /* Smaller font size */
     cursor: pointer;
-    background-color: #ff1100;
 }
 
 .button:hover {
@@ -95,6 +101,14 @@ button:focus {
     width: 450px;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+}
+
+.button:hover {
+    opacity: 0.8;
+}
+
+button:focus {
+    outline: none;
 }
 
 @media (max-width: 768px) {

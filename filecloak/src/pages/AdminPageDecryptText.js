@@ -150,7 +150,7 @@ const handleDecrypt = async (e) => {
                   </button>
                   <br />
                 </div>
-                <h2 className='header2'>Input Key</h2>
+                <h2 className='firstheader2'>Input Key</h2>
                 <input
                   type="text"
                   className='admin-key-input'

@@ -283,7 +283,7 @@ const handleDecrypt = async (e) => {
                   <br />
                 </div>
                 <div className="file-input-div">
-                  <div className="drop-area" id="dropArea">
+                  <div className="decryptdrop-area" id="dropArea">
                     {!fileNames && <p>Drag and drop files or click to select</p>}
                     <input
                       className="file-input"
