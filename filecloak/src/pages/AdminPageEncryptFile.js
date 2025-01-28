@@ -216,93 +216,93 @@ function AdminPageEncryptFile() {
         const storage = await setupStorage(); // Ensure storage is ready before proceeding
         const filesArray = Array.from(files);
         const { formData, ivs, ivHexs, mimeTypes } = await processFilesForUpload(files, zipFiles, encryptionKey);
+        let fileIndex = 0; // Initialize an index counter
+        // Upload encrypted files to Firebase Storage
+        for (const [key, value] of formData.entries()) {
+          if (key.startsWith("files")) {
         
-
-      // Upload encrypted files to Firebase Storage
-      for (const [key, value] of formData.entries()) {
-        if (key.startsWith("files")) {
-      
-          if (value instanceof File || value instanceof Blob) {
-            try {
-               // Extract original filename and generate random string
-                const filePath = `uploads/${user.email}/${value.name}`;
-        
-                const storageRef = ref(storage, filePath);
-        
-                // Upload file with MIME type metadata
-                const metadata = { contentType: value.type, contentDisposition: 'attachment', };
-                const uploadSnapshot = await uploadBytes(storageRef, value, metadata);
-        
-                const downloadURL = await getDownloadURL(storageRef);
-        
-                const index = [...formData.keys()].indexOf(key); // Get the current index
-                const iv = ivs[index];
-                const ivHex = ivHexs[index];
-                const mimeType = mimeTypes[index];
-                const noteToEncrypt = (typeof fileNote === 'string' && fileNote.trim()) 
-                ? fileNote 
-                : 'There is no note attached';
-
-                  const response = await fetch('https://filecloak4.vercel.app/api/encryptfile', {
-                  // const response = await fetch('http://localhost:4000/api/encryptfile', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': `Bearer ${idToken}` // Send Firebase auth token
-                    },
-                    body: JSON.stringify({ text: noteToEncrypt, key: encryptionKey, iv: ivHex }),
-                  });
+            if (value instanceof File || value instanceof Blob) {
+              try {
+                // Extract original filename and generate random string
+                  const filePath = `uploads/${user.email}/${value.name}`;
           
-                  const data = await response.json();
+                  const storageRef = ref(storage, filePath);
           
-                  if (response.ok) {
-                    linkArray.push(downloadURL); // Add to the array
-                    ivHexArray.push(ivHex);
-                    const dateUploaded = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).replace(' ', 'T');// Current timestamp
-                    const fileName = value.name; // Assuming `value.name` contains the filename
-                    uniqueFileNameArray.push(fileName);
-                    // Upload data to Firestore
-                    const userFilesCollectionRef = collection(db, "users", user.email, "files"); // Path: users/{user.email}/files
+                  // Upload file with MIME type metadata
+                  const metadata = { contentType: value.type, contentDisposition: 'attachment', };
+                  const uploadSnapshot = await uploadBytes(storageRef, value, metadata);
+          
+                  const downloadURL = await getDownloadURL(storageRef);
+          
+                  const iv = ivs[fileIndex];
+                  const ivHex = ivHexs[fileIndex];
+                  const mimeType = mimeTypes[fileIndex];
+                  const noteToEncrypt = (typeof fileNote === 'string' && fileNote.trim()) 
+                  ? fileNote 
+                  : 'There is no note attached';
 
-                    const fileDocRef = doc(userFilesCollectionRef, `${ivHex}`); // Document ID: dateUploaded-fileName
-
-                    console.log("EncryptedFileNote: ", data.encryptedText)
-                    const encryptedNote = data.encryptedText
-                    await setDoc(fileDocRef, {
-                      fileUrl: downloadURL,
-                      fileName: fileName,
-                      fileType: mimeType,
-                      dateUploaded: dateUploaded,
-                      encryptedNote: encryptedNote,
-                      uploadedBy: user.email, // Optionally store the user who uploaded the file
+                    const response = await fetch('https://filecloak4.vercel.app/api/encryptfile', {
+                    // const response = await fetch('http://localhost:4000/api/encryptfile', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}` // Send Firebase auth token
+                      },
+                      body: JSON.stringify({ text: noteToEncrypt, key: encryptionKey, iv: ivHex }),
                     });
-                    const encryptionToken = encryptedNote + ':' + ivHex
-                    encryptionTokens.push(encryptionToken)
-                    // Trigger file download after successfully storing data in Firestore
-                    // try {
-                    //   const response = await fetch(downloadURL); // Fetch the file
-                    //   const blob = await response.blob(); // Convert to Blob
+            
+                    const data = await response.json();
+            
+                    if (response.ok) {
+                      linkArray.push(downloadURL); // Add to the array
+                      ivHexArray.push(ivHex);
+                      const dateUploaded = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).replace(' ', 'T');// Current timestamp
+                      const fileName = value.name; // Assuming `value.name` contains the filename
+                      uniqueFileNameArray.push(fileName);
+                      // Upload data to Firestore
+                      const userFilesCollectionRef = collection(db, "users", user.email, "files"); // Path: users/{user.email}/files
 
-                    //   const link = document.createElement("a");
-                    //   link.href = URL.createObjectURL(blob);
-                    //   link.download = fileName; // Set correct file name
-                    //   document.body.appendChild(link);
-                    //   link.click();
-                    //   document.body.removeChild(link);
-                    // } catch (downloadError) {
-                    //   console.error("Failed to download the encrypted file:", downloadError);
-                    // }
-                    setError('');
-                  } else {
-                    setError(data.error);
-                  }             
-                
-            } catch (error) {
-              console.error("Error during upload or encryption. Please refresh the page:", error);
+                      const fileDocRef = doc(userFilesCollectionRef, `${ivHex}`); // Document ID: dateUploaded-fileName
+                      
+                      const encryptedNote = data.encryptedText
+                      const encryptionToken = encryptedNote + ':' + ivHex
+                      encryptionTokens.push(encryptionToken)
+                      await setDoc(fileDocRef, {
+                        fileUrl: downloadURL,
+                        fileName: fileName,
+                        fileType: mimeType,
+                        dateUploaded: dateUploaded,
+                        encryptedNote: encryptedNote,
+                        uploadedBy: user.email, // Optionally store the user who uploaded the file
+                      });
+
+                      // Trigger file download after successfully storing data in Firestore
+                      // try {
+                      //   const response = await fetch(downloadURL); // Fetch the file
+                      //   const blob = await response.blob(); // Convert to Blob
+
+                      //   const link = document.createElement("a");
+                      //   link.href = URL.createObjectURL(blob);
+                      //   link.download = fileName; // Set correct file name
+                      //   document.body.appendChild(link);
+                      //   link.click();
+                      //   document.body.removeChild(link);
+                      // } catch (downloadError) {
+                      //   console.error("Failed to download the encrypted file:", downloadError);
+                      // }
+                      setError('');
+                    } else {
+                      setError(data.error);
+                    }
+                    
+                    fileIndex++;
+                  
+              } catch (error) {
+                console.error("Error during upload or encryption. Please refresh the page:", error);
+              }
             }
           }
         }
-      }
 
       setLinks(linkArray);
       setEncryptionToken(encryptionTokens);
@@ -353,12 +353,19 @@ const handleGenerateKey = async () => {
     // Convert FileList to an array
     const fileArray = Array.from(files);
   
+    // Ensure uniqueFileName is an array and not a single value
+    if (!Array.isArray(uniqueFileName)) {
+      console.error('uniqueFileName is not an array. Check the encryption process setup.');
+      return;
+    }
+  
     const fileData = fileArray.map((file, index) => {
-      const fileName = uniqueFileName || `File ${index + 1}`;
+      const fileName = uniqueFileName[index] || `File ${index + 1}`; // Use the correct name for each file
       const encryptedToken = encryptionToken[index] || 'N/A'; // Get the corresponding encryption token
       const fileLink = links[index] || 'N/A'; // Get the corresponding encrypted link
+  
       return `File Name: ${fileName}\nEncryption Token: ${encryptedToken}\nFile Download Link: ${fileLink}\n`;
-    }).join('\n');
+    }).join('\n\n'); // Add extra spacing between files for better readability
   
     const exportContent = `Encryption Key: ${encryptionKey}\n\n${fileData}`;
     const blob = new Blob([exportContent], { type: 'text/plain' });
@@ -367,6 +374,7 @@ const handleGenerateKey = async () => {
     link.download = 'encryptedFilesInfo.txt';
     link.click();
   };
+  
   
 
   const handleNoteChange = (value) => {
