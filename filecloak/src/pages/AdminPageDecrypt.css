@@ -13,9 +13,19 @@
     position: relative;
   }
 
+
+.file-input {
+    position: absolute;
+    opacity: 0;
+    width: 50%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 1;
+}
 .decryptdrop-area {
-    flex: 10;
+    flex: 2;
     border: 2px dashed #aaa;
+    display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
