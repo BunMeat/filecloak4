@@ -24,6 +24,15 @@
     position: relative;
 }
 
+.userfile-input {
+    position: absolute;
+    opacity: 0;
+    width: 50%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 1;
+}
+
 .userpage-container {
     width: 80%;
     margin: 30px auto;

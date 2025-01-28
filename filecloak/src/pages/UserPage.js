@@ -196,28 +196,6 @@ const handleDecrypt = async (e) => {
     });
   };
 
-  const exportToTxt = (decryptedURL, decryptedNote) => {
-    const text = `Decrypted URL: ${decryptedURL}\n\nDecrypted Note: ${decryptedNote}`;
-    const blob = new Blob([text], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'decrypted_data.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const exportToTxt2 = (decryptedText) => {
-    const text = `Decrypted Text: ${decryptedText}`;
-    const blob = new Blob([text], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'decrypted_text.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const handleFileChange = (event) => {
     const selectedFiles = event.target.files;
     setFiles(selectedFiles);
@@ -260,7 +238,7 @@ const handleDecrypt = async (e) => {
                   <div className="drop-area" id="dropArea">
                     {!fileNames && <p>Drag and drop files or click to select</p>}
                     <input
-                      className="file-input"
+                      className="userfile-input"
                       type="file"
                       id="fileInput"
                       name="file"
