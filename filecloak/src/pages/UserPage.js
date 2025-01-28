@@ -234,6 +234,7 @@ const handleDecrypt = async (e) => {
                   </button>
                   <br />
                 </div>
+                <h2 className='header2'>Input Encrypted File</h2>
                 <div className="file-input-div">
                   <div className="drop-area" id="dropArea">
                     {!fileNames && <p>Drag and drop files or click to select</p>}

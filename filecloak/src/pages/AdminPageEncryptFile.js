@@ -436,6 +436,7 @@ const handleGenerateKey = async () => {
                   </div>
                 </div>
                 <div>
+                <h2 className='header2'>Key Input</h2>
                   <textarea
                     type='text'
                     className='counter'
@@ -486,40 +487,47 @@ const handleGenerateKey = async () => {
                 {encryptionToken.length > 0 && (
                   <div>
                     {encryptionToken.map((iv, index) => (
-                      <div key={index}>
-                        <textarea
-                          rows="3"
-                          cols="80"
-                          value={iv}
-                          readOnly
-                          className="encrypted-links-textarea"
-                        />
-                        <button
-                          className="copy-btn"
-                          type="button"
-                          onClick={() => navigator.clipboard.writeText(iv)}
-                        >
-                          Copy to Clipboard
-                        </button>
+                      <div>
+                        <h2 className='header2'>Encryption Token</h2>
+                        <div key={index}>
+                          <textarea
+                            rows="3"
+                            cols="80"
+                            value={iv}
+                            readOnly
+                            className="encrypted-links-textarea"
+                          />
+                          <button
+                            className="copy-btn"
+                            type="button"
+                            onClick={() => navigator.clipboard.writeText(iv)}
+                          >
+                            Copy to Clipboard
+                          </button>
+                        </div>
                       </div>
                     ))}
                     {links.map((link, index) => (
-                      <div key={index}>
-                        <textarea
-                          rows="3"
-                          cols="80"
-                          value={link}
-                          readOnly
-                          className="encrypted-links-textarea"
-                        />
-                        <button
-                          className="copy-btn"
-                          type="button"
-                          onClick={() => navigator.clipboard.writeText(link)}
-                        >
-                          Copy to Clipboard
-                        </button>
+                      <div>
+                        <h2 className='header2'>Encrypted File Download Links</h2>
+                        <div key={index}>
+                          <textarea
+                            rows="3"
+                            cols="80"
+                            value={link}
+                            readOnly
+                            className="encrypted-links-textarea"
+                          />
+                          <button
+                            className="copy-btn"
+                            type="button"
+                            onClick={() => navigator.clipboard.writeText(link)}
+                          >
+                            Copy to Clipboard
+                          </button>
+                        </div>
                       </div>
+                      
                     ))}
 
 
