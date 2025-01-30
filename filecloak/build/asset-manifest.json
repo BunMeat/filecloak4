@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/static/css/main.90286acb.css",
+    "main.js": "/static/js/main.96519401.js",
+    "static/media/FileCloak.webp": "/static/media/FileCloak.24a85762ff95962c1eec.webp",
+    "index.html": "/index.html",
+    "main.90286acb.css.map": "/static/css/main.90286acb.css.map",
+    "main.96519401.js.map": "/static/js/main.96519401.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.90286acb.css",
+    "static/js/main.96519401.js"
+  ]
+}
