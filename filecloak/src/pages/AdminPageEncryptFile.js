@@ -6,9 +6,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import FileCloak from '../FileCloak.webp';
 import './AdminPageEncryptFile.css';
 import { initializeApp } from 'firebase/app';
-import CryptoJS from 'crypto-js';
 import JSZip from 'jszip';
-import pako from 'pako';
 
 
 // Firebase configuration
@@ -21,39 +19,35 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_APP_ID,
 };
 
-const firebaseApp = initializeApp(firebaseConfig); // Initialize only once
-const auth = getAuth(firebaseApp); // Use the firebaseApp for auth
-const db = getFirestore(firebaseApp); // Firestore instance
+const firebaseApp = initializeApp(firebaseConfig); 
+const auth = getAuth(firebaseApp); 
+const db = getFirestore(firebaseApp);
 
 function AdminPageEncryptFile() {
   const navigate = useNavigate();
   const [encryptionKey, setEncryptionKey] = useState('');
-  const [note, setNote] = useState(''); // State for a single note input
   const [files, setFiles] = useState([]);
   const [zipFiles, setZipFiles] = useState(false);
   const [links, setLinks] = useState([]);
   const [encryptionToken, setEncryptionToken] = useState([]);
   const [error, setError] = useState('');
-  const [fileNames, setFileNames] = useState(''); // State for displaying file names
-  const [uniqueFileName, setUniqueFileName] = useState(''); // State for displaying file names
-  const [fileNote, setFileNote] = useState([]); // State to hold notes for each file
-  const [encryptedFileNote, setEncryptedFileNote] = useState([]);
-  const [role, setRole] = useState(''); // State to store user role
+  const [fileNames, setFileNames] = useState(''); 
+  const [uniqueFileName, setUniqueFileName] = useState(''); 
+  const [fileNote, setFileNote] = useState([]); 
+  const [role, setRole] = useState(''); 
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         try {
-          // Get the user's email
           const userEmail = user.email;
           
-          // Fetch the user's Firestore document based on email
-          const userDocRef = doc(db, 'users', userEmail); // Assuming user documents are stored by email
+          const userDocRef = doc(db, 'users', userEmail); 
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setRole(userData.role); // Assuming 'role' field exists in the user document
+            setRole(userData.role); 
           } else {
             console.log('No such user document found');
           }
@@ -69,8 +63,7 @@ function AdminPageEncryptFile() {
     return () => unsubscribe();})
 
     const setupStorage = async () => {
-      // Initialize storage and validate other preconditions
-      const storage = getStorage(firebaseApp); // Ensure firebaseApp is initialized earlier
+      const storage = getStorage(firebaseApp); 
       return storage;
     };
 
@@ -84,24 +77,19 @@ function AdminPageEncryptFile() {
       });
   };
 
-  // Function to handle file change and update file names in state
   const handleFileChange = (event) => {
     const selectedFiles = event.target.files;
     setFiles(selectedFiles);
     
-    // Update file names using state
     const fileNamesArray = Array.from(selectedFiles).map(file => file.name).join(', ');
     setFileNames(fileNamesArray);
 
-    // Initialize file notes based on the number of selected files
-    setFileNote(Array.from(selectedFiles).map(() => '')); // Create an array of empty strings
+    setFileNote(Array.from(selectedFiles).map(() => '')); 
   };
 
   const encryptData = async (data, key) => {
-    // Generate a random IV
     const iv = crypto.getRandomValues(new Uint8Array(16));
     
-    // Encrypt the data
     const encryptedData = await crypto.subtle.encrypt(
       {
         name: "AES-CTR",
@@ -119,9 +107,9 @@ function AdminPageEncryptFile() {
   const processFilesForUpload = async (files, zipFiles, encryptionKeyString) => {
 
     const formData = new FormData();
-    const ivs = []; // Array to store IVs for each file
+    const ivs = []; 
     const ivHexs = []
-    const mimeTypes = []; // Array to store MIME types for each file
+    const mimeTypes = []; 
   
     // Convert encryption key string to CryptoKey
     const rawKey = new Uint8Array(
@@ -144,17 +132,14 @@ function AdminPageEncryptFile() {
     
       const zipBlob = await zip.generateAsync({ type: "blob" });
 
-    
-      // Convert Blob to ArrayBuffer
       const zipArrayBuffer = await zipBlob.arrayBuffer();
 
-      // Encrypt the zipped file
       const { encryptedData, iv, ivHex } = await encryptData(
         zipArrayBuffer,
         encryptionKey
       );
-      ivs.push(iv); // Store the IV for zipped file
-      ivHexs.push(ivHex); // Store the IV for zipped file
+      ivs.push(iv); 
+      ivHexs.push(ivHex); 
       mimeTypes.push("application/x-zip-compressed");
       const randomString = Math.random().toString(36).substring(2, 8); // 6-character random string
     
@@ -213,8 +198,7 @@ function AdminPageEncryptFile() {
       const user = auth.currentUser;
       if (user) {
         const idToken = await user.getIdToken();
-        const storage = await setupStorage(); // Ensure storage is ready before proceeding
-        const filesArray = Array.from(files);
+        const storage = await setupStorage(); 
         const { formData, ivs, ivHexs, mimeTypes } = await processFilesForUpload(files, zipFiles, encryptionKey);
         let fileIndex = 0; // Initialize an index counter
         // Upload encrypted files to Firebase Storage
@@ -234,7 +218,6 @@ function AdminPageEncryptFile() {
           
                   const downloadURL = await getDownloadURL(storageRef);
           
-                  const iv = ivs[fileIndex];
                   const ivHex = ivHexs[fileIndex];
                   const mimeType = mimeTypes[fileIndex];
                   const noteToEncrypt = (typeof fileNote === 'string' && fileNote.trim()) 
@@ -254,10 +237,10 @@ function AdminPageEncryptFile() {
                     const data = await response.json();
             
                     if (response.ok) {
-                      linkArray.push(downloadURL); // Add to the array
+                      linkArray.push(downloadURL); 
                       ivHexArray.push(ivHex);
                       const dateUploaded = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).replace(' ', 'T');// Current timestamp
-                      const fileName = value.name; // Assuming `value.name` contains the filename
+                      const fileName = value.name; 
                       uniqueFileNameArray.push(fileName);
                       // Upload data to Firestore
                       const userFilesCollectionRef = collection(db, "users", user.email, "files"); // Path: users/{user.email}/files
@@ -272,8 +255,7 @@ function AdminPageEncryptFile() {
                         fileName: fileName,
                         fileType: mimeType,
                         dateUploaded: dateUploaded,
-                        encryptedNote: encryptedNote,
-                        uploadedBy: user.email, // Optionally store the user who uploaded the file
+                        encryptedNote: encryptedNote
                       });
 
                       // Trigger file download after successfully storing data in Firestore

@@ -16,14 +16,14 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_APP_ID,
 };
 
-const firebaseApp = initializeApp(firebaseConfig); // Initialize only once
-const auth = getAuth(firebaseApp); // Use the firebaseApp for auth
-const db = getFirestore(firebaseApp); // Firestore instance
+const firebaseApp = initializeApp(firebaseConfig); 
+const auth = getAuth(firebaseApp); 
+const db = getFirestore(firebaseApp); 
 
 function DataList() {
   const [data, setData] = useState([]);
   const [error, setError] = useState('');
-  const [role, setRole] = useState(''); // State to store user role
+  const [role, setRole] = useState(''); 
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -45,12 +45,12 @@ function DataList() {
           const userEmail = user.email;
           
           // Fetch the user's Firestore document based on email
-          const userDocRef = doc(db, 'users', userEmail); // Assuming user documents are stored by email
+          const userDocRef = doc(db, 'users', userEmail); 
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setRole(userData.role); // Assuming 'role' field exists in the user document
+            setRole(userData.role); 
           } else {
             console.log('No such user document found');
           }
@@ -98,12 +98,12 @@ function DataList() {
   return (
     <div className='list-body'>
         <div className="list-container" id="listForm">
-            <div className="button-row"> {/* Changed class to className */}
-                <div className="left-buttons"> {/* Changed class to className */}
+            <div className="button-row"> 
+                <div className="left-buttons"> 
                     <button className="encrypt-btn" onClick={() => navigate('/encryptfile')}>Encrypt</button>
                     <button className="decrypt-btn" onClick={() => navigate('/decrypt')}>Decrypt</button>
                 </div>
-                <div className="right-button"> {/* Changed class to className */}
+                <div className="right-button"> 
                     <button
                         type="button"
                         className="logout-btn"

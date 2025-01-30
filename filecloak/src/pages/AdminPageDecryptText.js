@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signOut } from 'firebase/auth'; // Firebase auth functions
+import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore'
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage } from 'firebase/storage';
 import FileCloak from '../FileCloak.webp';
 import './AdminPageDecryptText.css';
 import { initializeApp } from 'firebase/app';
-import { Buffer } from 'buffer';
 
 // Firebase configuration
 const firebaseConfig = {
@@ -20,7 +19,7 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
-const db = getFirestore(firebaseApp); // Firestore instance
+const db = getFirestore(firebaseApp); 
 const storage = getStorage(firebaseApp)
 
 function AdminPageDecryptText() {
@@ -28,10 +27,9 @@ function AdminPageDecryptText() {
 
   // States to store the inputs and decrypted data
   const [key, setKey] = useState('');
-  const [decryptedNote, setDecryptedNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [role, setRole] = useState(''); // State to store user role
+  const [role, setRole] = useState(''); 
   const [textToDecrypt, setTextToDecrypt] = useState('');
   const [output, setOutput] = useState('');
 
@@ -43,12 +41,12 @@ function AdminPageDecryptText() {
           const userEmail = user.email;
           
           // Fetch the user's Firestore document based on email
-          const userDocRef = doc(db, 'users', userEmail); // Assuming user documents are stored by email
+          const userDocRef = doc(db, 'users', userEmail); 
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setRole(userData.role); // Assuming 'role' field exists in the user document
+            setRole(userData.role); 
           } else {
             console.log('No such user document found');
           }

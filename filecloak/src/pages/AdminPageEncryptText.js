@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signOut } from 'firebase/auth'; // Import Firebase auth functions
+import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore'
 import FileCloak from '../FileCloak.webp';
 import './AdminPageEncryptText.css';
 import { initializeApp } from 'firebase/app';
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -16,9 +15,9 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_APP_ID,
 };
 
-const firebaseApp = initializeApp(firebaseConfig); // Initialize only once
-const auth = getAuth(firebaseApp); // Use the firebaseApp for auth
-const db = getFirestore(firebaseApp); // Firestore instance
+const firebaseApp = initializeApp(firebaseConfig); 
+const auth = getAuth(firebaseApp); 
+const db = getFirestore(firebaseApp); 
 
 function AdminPageEncryptText() {
   const navigate = useNavigate();
@@ -26,9 +25,8 @@ function AdminPageEncryptText() {
   const [encryptionKey, setEncryptionKey] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
-  const [role, setRole] = useState(''); // State to store user role
-
-  // On component mount, check if the user is authenticated
+  const [role, setRole] = useState(''); 
+  
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
@@ -37,12 +35,12 @@ function AdminPageEncryptText() {
           const userEmail = user.email;
           
           // Fetch the user's Firestore document based on email
-          const userDocRef = doc(db, 'users', userEmail); // Assuming user documents are stored by email
+          const userDocRef = doc(db, 'users', userEmail); 
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setRole(userData.role); // Assuming 'role' field exists in the user document
+            setRole(userData.role); 
           } else {
             console.log('No such user document found');
           }

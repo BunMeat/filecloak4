@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signOut } from 'firebase/auth'; // Firebase auth functions
+import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore'
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import FileCloak from '../FileCloak.webp';
 import './AdminPageDecrypt.css';
 import { initializeApp } from 'firebase/app';
-import { Buffer } from 'buffer';
 
-// Firebase configuration
+
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -20,8 +18,7 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
-const db = getFirestore(firebaseApp); // Firestore instance
-const storage = getStorage(firebaseApp)
+const db = getFirestore(firebaseApp);
 
 function AdminPageDecrypt() {
   const navigate = useNavigate();
@@ -29,14 +26,12 @@ function AdminPageDecrypt() {
   // States to store the inputs and decrypted data
   const [keyInput, setKeyInput] = useState('');
   const [tokenInput, setTokenInput] = useState('');
-  const [decryptedURL, setDecryptedURL] = useState('');
-  const [decryptedNote, setDecryptedNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [role, setRole] = useState(''); // State to store user role
+  const [role, setRole] = useState(''); 
   const [files, setFiles] = useState([]);
-  const [fileNames, setFileNames] = useState(''); // State for displaying file names
-  const [fileNotes, setFileNotes] = useState([]); // State to hold notes for each file
+  const [fileNames, setFileNames] = useState('');
+  const [fileNotes, setFileNotes] = useState([]); 
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -46,12 +41,12 @@ function AdminPageDecrypt() {
           const userEmail = user.email;
           
           // Fetch the user's Firestore document based on email
-          const userDocRef = doc(db, 'users', userEmail); // Assuming user documents are stored by email
+          const userDocRef = doc(db, 'users', userEmail); 
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setRole(userData.role); // Assuming 'role' field exists in the user document
+            setRole(userData.role); 
           } else {
             console.log('No such user document found');
           }
@@ -196,28 +191,6 @@ const handleDecrypt = async (e) => {
     .catch((error) => {
       setError('Failed to log out: ' + error.message);
     });
-  };
-
-  const exportToTxt = (decryptedURL, decryptedNote) => {
-    const text = `Decrypted URL: ${decryptedURL}\n\nDecrypted Note: ${decryptedNote}`;
-    const blob = new Blob([text], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'decrypted_data.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const exportToTxt2 = (decryptedText) => {
-    const text = `Decrypted Text: ${decryptedText}`;
-    const blob = new Blob([text], { type: 'text/plain' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'decrypted_text.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const handleFileChange = (event) => {

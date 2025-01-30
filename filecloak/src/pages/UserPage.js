@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signOut } from 'firebase/auth'; // Firebase auth functions
+import { getAuth, signOut } from 'firebase/auth'; 
 import { getFirestore, doc, getDoc } from 'firebase/firestore'
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import FileCloak from '../FileCloak.webp';
 import './UserPage.css';
 import { initializeApp } from 'firebase/app';
 
-// Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -19,23 +17,19 @@ const firebaseConfig = {
 
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
-const db = getFirestore(firebaseApp); // Firestore instance
-const storage = getStorage(firebaseApp)
+const db = getFirestore(firebaseApp);
 
 function UserPage() {
   const navigate = useNavigate();
 
-  // States to store the inputs and decrypted data
   const [keyInput, setKeyInput] = useState('');
   const [tokenInput, setTokenInput] = useState('');
-  const [decryptedURL, setDecryptedURL] = useState('');
-  const [decryptedNote, setDecryptedNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [role, setRole] = useState(''); // State to store user role
+  const [role, setRole] = useState(''); 
   const [files, setFiles] = useState([]);
-  const [fileNames, setFileNames] = useState(''); // State for displaying file names
-  const [fileNotes, setFileNotes] = useState([]); // State to hold notes for each file
+  const [fileNames, setFileNames] = useState(''); 
+  const [fileNotes, setFileNotes] = useState([]); 
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -45,12 +39,12 @@ function UserPage() {
           const userEmail = user.email;
           
           // Fetch the user's Firestore document based on email
-          const userDocRef = doc(db, 'users', userEmail); // Assuming user documents are stored by email
+          const userDocRef = doc(db, 'users', userEmail); 
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setRole(userData.role); // Assuming 'role' field exists in the user document
+            setRole(userData.role); 
           } else {
             console.log('No such user document found');
           }
