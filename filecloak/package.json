@@ -23,8 +23,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "cross-env": "^7.0.3",
-    "cssnano": "^7.0.6"
+    "cross-env": "^7.0.3"
   },
   "scripts": {
     "start": "react-scripts start",
