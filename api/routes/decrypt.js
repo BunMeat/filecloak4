@@ -3,14 +3,6 @@ var express = require('express');
 var CryptoJS = require('crypto-js');
 var router = express.Router();
 
-// AES Decrypt function
-
-
-  // 20250101_000309(0) (39).jpg-kcicct.enc file name
-  // 5d119497f7d54b1abe3e97bdc05e29ae57031d92fb20d03303a252042bf405cb key
-  // Ort4OxWyfMpiP8YZPpZW2w==:69d099399319801439351af1b724ca56 encryptedText
-  // hahaha expected result
-
   function decrypt(encryptedText, key) {
     // Split the ciphertext and IV
     const [ciphertext, ivHex] = encryptedText.split(':');

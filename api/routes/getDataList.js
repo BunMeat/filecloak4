@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var { getFirestore, collection, doc, getDocs } = require('firebase/firestore');
+var { getFirestore, collection, getDocs } = require('firebase/firestore');
 
 // Initialize Firestore
 const firestore = getFirestore();
