@@ -168,13 +168,13 @@ const handleDecrypt = async (e) => {
                 URL.revokeObjectURL(fileNoteUrl);
               }
   
-      setLoading(false);
       alert('File decrypted successfully!');
     }
     
   } catch (error) {
     console.error('Error during decryption:', error);
     alert('Error during decryption. Please check your key and token.');
+  } finally {
     setLoading(false);
   }
 };
@@ -260,8 +260,12 @@ const handleDecrypt = async (e) => {
                   onChange={(e) => setTokenInput(e.target.value)}
                   required
                 />
-                <button type="submit" className='decrypt-btn' disabled={loading}>
-                  {loading ? 'Decrypting...' : 'Decrypt'}
+                <button type="submit" className='userdecryptfile-btn' disabled={loading}>
+                  {loading ? (
+                    <div className="loading-spinner"></div> 
+                  ) : (
+                    "Decrypt"
+                  )}
                 </button>
               </div>
             </div>

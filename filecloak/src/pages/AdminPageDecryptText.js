@@ -61,43 +61,45 @@ function AdminPageDecryptText() {
 
     return () => unsubscribe();})
 
-const handleDecrypt = async (e) => {
-  e.preventDefault();
-  if (!textToDecrypt || !key) {
-    setError('Please enter both text and key.');
-    return;
-  }
-
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      const idToken = await user.getIdToken(); // Get the ID token for auth
-    
-      const response = await fetch('https://filecloak4.vercel.app/api/decrypttext', {
-      // const response = await fetch('http://localhost:4000/api/decrypttext', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}` // Send Firebase auth token
-        },
-        body: JSON.stringify({ encryptedText: textToDecrypt, key }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setOutput(data.decryptedText); // Set the encrypted text in the output
-        setError('');
-      } else {
-        setError(data.error);
-      }
-    } else {
-      setError('User is not authenticated.');
+  const handleDecrypt = async (e) => {
+    e.preventDefault();
+    if (!textToDecrypt || !key) {
+      setError('Please enter both text and key.');
+      return;
     }
-  } catch (error) {
-    setError('An error occurred: ' + error.message);
-  }
-};
+    setLoading(true);
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const idToken = await user.getIdToken(); // Get the ID token for auth
+      
+        const response = await fetch('https://filecloak4.vercel.app/api/decrypttext', {
+        // const response = await fetch('http://localhost:4000/api/decrypttext', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}` // Send Firebase auth token
+          },
+          body: JSON.stringify({ encryptedText: textToDecrypt, key }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setOutput(data.decryptedText); // Set the encrypted text in the output
+          setError('');
+        } else {
+          setError(data.error);
+        }
+      } else {
+        setError('User is not authenticated.');
+      }
+    } catch (error) {
+      setError('An error occurred: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   const logOut = async () => {
@@ -171,9 +173,13 @@ const handleDecrypt = async (e) => {
                     /><br/>
                     <button id="copyButton2" type="button" onClick={() => navigator.clipboard.writeText(output)}>Copy to Clipboard</button>
                   </div>
-                <button type="submit" className='decrypt-btn' disabled={loading}>
-                  {loading ? 'Decrypting...' : 'Decrypt'}
-                </button>
+                  <button type="submit" className="decrypttext-btn" id="decryptButton" disabled={loading}>
+                    {loading ? (
+                      <div className="loading-spinner"></div> 
+                    ) : (
+                      "Decrypt"
+                    )}
+                  </button>
               </div>
             </div>
           </form>

@@ -63,7 +63,7 @@ const handleDecrypt = async (e) => {
     setError('Please enter both text and key.');
     return;
   }
-
+  setLoading(true);
   try {
     const user = auth.currentUser;
     if (user) {
@@ -92,6 +92,8 @@ const handleDecrypt = async (e) => {
     }
   } catch (error) {
     setError('An error occurred: ' + error.message);
+  } finally {
+    setLoading(false);
   }
 };
 
@@ -157,9 +159,13 @@ const handleDecrypt = async (e) => {
                     /><br/>
                     <button id="copyButton2" type="button" onClick={() => navigator.clipboard.writeText(output)}>Copy to Clipboard</button>
                   </div>
-                <button type="submit" className='decrypt-btn' disabled={loading}>
-                  {loading ? 'Decrypting...' : 'Decrypt'}
-                </button>
+                  <button type="submit" className="userdecrypttext-btn" id="decryptButton" disabled={loading}>
+                    {loading ? (
+                      <div className="loading-spinner"></div> 
+                    ) : (
+                      "Decrypt"
+                    )}
+                  </button>
               </div>
             </div>
           </form>
