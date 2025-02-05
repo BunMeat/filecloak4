@@ -24,6 +24,7 @@ function DataList() {
   const [data, setData] = useState([]);
   const [error, setError] = useState('');
   const [role, setRole] = useState(''); 
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -69,6 +70,7 @@ function DataList() {
   // Fetch data list
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await fetch('https://filecloak4.vercel.app/api/datalist');
         // const response = await fetch('http://localhost:4000/api/datalist');
@@ -90,6 +92,8 @@ function DataList() {
       } catch (error) {
         console.error("Error fetching data:", error);
         setError('Error fetching data');
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -120,27 +124,32 @@ function DataList() {
         </header>
         {role === 'admin' && (
           <>
-            <h1>Data List</h1>
-            <ul className='list-ul'>
-              {data.map(item => (
-                <li className='list-li' key={item.email}>
-                  <strong>User Email:</strong> {item.email}
-                  {item.files.length > 0 ? (
-                    <ul>
-                      {item.files.map((file, index) => (
-                        <li key={index} className='individual-list'>
-                          <p>File Name: {file.fileName}</p>
-                          <p>File URL: {file.fileUrl}</p>
-                          <p>Date Uploaded: {file.dateUploaded}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>No files found</p>
-                  )}
-                </li>
-              ))}
-            </ul>
+            {loading ? (
+                <div className="loading-container">
+                  <div className="big-loading-spinner"></div>
+                </div>
+              ) : (
+                <ul className='list-ul'>
+                  {data.map(item => (
+                    <li className='list-li' key={item.email}>
+                      <strong>User Email:</strong> {item.email}
+                      {item.files.length > 0 ? (
+                        <ul>
+                          {item.files.map((file, index) => (
+                            <li key={index} className='individual-list'>
+                              <p>File Name: {file.fileName}</p>
+                              <p>File URL: {file.fileUrl}</p>
+                              <p>Date Uploaded: {file.dateUploaded}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>No files found</p>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
           </>
         )}
         
