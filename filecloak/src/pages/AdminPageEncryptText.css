@@ -81,19 +81,51 @@
 }
 
 
-.encrypt-file-btn, .encrypt-btn, .decrypt-btn, .list-btn {
+.encrypt-file-btn, .encrypttext-btn, .decrypt-btn, .list-btn {
     width: 100%;
-    padding: 5px; /* Reduce padding */
+    padding: 5px;
     border: none;
-    border-radius: 2px; /* Smaller rounded corners */
+    border-radius: 2px; 
     color: #fff;
-    font-size: 10px; /* Smaller font size */
+    font-size: 10px; 
     cursor: pointer;
 }
 
-.encrypt-btn {
-    background-color: #4CAF50;
+.encrypttext-btn {
+    background: #4CAF50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
 }
+
+.encryptfile-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  .loading-spinner {
+      width: 100%; 
+      height: 100%; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+  }
+  
+  .loading-spinner::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 
 .decrypt-btn {
     background-color: #f44336;

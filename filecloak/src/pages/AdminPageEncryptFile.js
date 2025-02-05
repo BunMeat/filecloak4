@@ -35,6 +35,7 @@ function AdminPageEncryptFile() {
   const [uniqueFileName, setUniqueFileName] = useState(''); 
   const [fileNote, setFileNote] = useState([]); 
   const [role, setRole] = useState(''); 
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -193,7 +194,7 @@ function AdminPageEncryptFile() {
       setError('Please provide an encryption key.');
       return;
     }
-  
+    setLoading(true);
     try {
       const user = auth.currentUser;
       if (user) {
@@ -294,12 +295,14 @@ function AdminPageEncryptFile() {
       }
     } catch (error) {
       setError('An error occurred: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
   
 
   const handleKeyChange = (event) => {
-    const key = event.target.value.slice(0, 64); // Limit to 64 characters
+    const key = event.target.value.slice(0, 64); 
     setEncryptionKey(key);
   };
 
@@ -470,8 +473,12 @@ const handleGenerateKey = async () => {
                     />
                 </div>
 
-                <button type="submit" className="encrypt-btn" id="encryptButton">
-                  Encrypt
+                <button type="submit" className="encryptfile-btn" id="encryptButton" disabled={loading}>
+                  {loading ? (
+                    <div className="loading-spinner"></div> 
+                  ) : (
+                    "Encrypt"
+                  )}
                 </button>
                 {error && <p className="error-message">{error}</p>}
                 {encryptionToken.length > 0 && (

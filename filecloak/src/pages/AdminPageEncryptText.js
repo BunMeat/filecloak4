@@ -26,6 +26,7 @@ function AdminPageEncryptText() {
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
   const [role, setRole] = useState(''); 
+  const [loading, setLoading] = useState(false);
   
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -72,7 +73,7 @@ function AdminPageEncryptText() {
       setError('Please enter both text and key.');
       return;
     }
-
+    setLoading(true);
     try {
       const user = auth.currentUser;
       if (user) {
@@ -101,6 +102,8 @@ function AdminPageEncryptText() {
       }
     } catch (error) {
       setError('An error occurred: ' + error.message);
+    } finally {
+      setLoading(false); // Stop loading when done
     }
   };
 
@@ -165,7 +168,13 @@ function AdminPageEncryptText() {
                     /><br/>
                     <button id="copyButton2" type="button" onClick={() => navigator.clipboard.writeText(output)}>Copy to Clipboard</button>
                   </div>
-                  <button type="submit" className="encrypt-btn">Encrypt</button>
+                  <button type="submit" className="encrypttext-btn" id="encryptButton" disabled={loading}>
+                    {loading ? (
+                      <div className="loading-spinner"></div> 
+                    ) : (
+                      "Encrypt"
+                    )}
+                  </button>
                   {error && <p className="error-message">{error}</p>}
                 </div>
                 <div>
