@@ -95,7 +95,7 @@ function AdminPageEncryptFile() {
       {
         name: "AES-CTR",
         counter: iv,
-        length: 128, // Counter length (must be 128 bits for AES-CTR)
+        length: 128,
       },
       key,
       data
@@ -183,6 +183,33 @@ function AdminPageEncryptFile() {
     return { formData, ivs, ivHexs, mimeTypes }; // Return both formData and IVs
   };
   
+  // Function to encrypt text using AES-CTR
+const encryptText = async (plaintext, keyHex, iv) => {
+  const encoder = new TextEncoder();
+  const rawKey = new Uint8Array(
+    keyHex.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
+  );
+
+  // Import key for AES-CTR
+  const key = await crypto.subtle.importKey(
+    'raw',
+    rawKey,
+    { name: 'AES-CTR' },
+    false,
+    ['encrypt']
+  );
+
+  // Encrypt text
+  const encryptedData = await crypto.subtle.encrypt(
+    { name: 'AES-CTR', counter: iv, length: 128 },
+    key,
+    encoder.encode(plaintext)
+  );
+
+  // Convert encrypted data to Base64
+  const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedData)));
+  return encryptedBase64;
+};
 
   const handleEncrypt = async (event) => {
     event.preventDefault();
@@ -220,65 +247,51 @@ function AdminPageEncryptFile() {
                   const downloadURL = await getDownloadURL(storageRef);
           
                   const ivHex = ivHexs[fileIndex];
+                  const iv = ivs[fileIndex];
                   const mimeType = mimeTypes[fileIndex];
                   const noteToEncrypt = (typeof fileNote === 'string' && fileNote.trim()) 
                   ? fileNote 
                   : 'There is no note attached';
 
-                    const response = await fetch('https://filecloak4.vercel.app/api/encryptfile', {
-                    // const response = await fetch('http://localhost:4000/api/encryptfile', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${idToken}` // Send Firebase auth token
-                      },
-                      body: JSON.stringify({ text: noteToEncrypt, key: encryptionKey, iv: ivHex }),
-                    });
-            
-                    const data = await response.json();
-            
-                    if (response.ok) {
-                      linkArray.push(downloadURL); 
-                      ivHexArray.push(ivHex);
-                      const dateUploaded = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).replace(' ', 'T');// Current timestamp
-                      const fileName = value.name; 
-                      uniqueFileNameArray.push(fileName);
-                      // Upload data to Firestore
-                      const userFilesCollectionRef = collection(db, "users", user.email, "files"); // Path: users/{user.email}/files
+                  const encryptedNote = await encryptText(noteToEncrypt, encryptionKey, iv);
+                  const encryptionToken = encryptedNote + ivHex;
+                  encryptionTokens.push(encryptionToken);
 
-                      const fileDocRef = doc(userFilesCollectionRef, `${ivHex}`); // Document ID: dateUploaded-fileName
-                      
-                      const encryptedNote = data.encryptedText
-                      const encryptionToken = encryptedNote + ':' + ivHex
-                      encryptionTokens.push(encryptionToken)
-                      await setDoc(fileDocRef, {
-                        fileUrl: downloadURL,
-                        fileName: fileName,
-                        fileType: mimeType,
-                        dateUploaded: dateUploaded,
-                        encryptedNote: encryptedNote
-                      });
+                  linkArray.push(downloadURL); 
+                  ivHexArray.push(ivHex);
+                  const dateUploaded = new Date().toLocaleString('sv-SE', { timeZone: 'Asia/Jakarta' }).replace(' ', 'T');// Current timestamp
+                  const fileName = value.name; 
+                  uniqueFileNameArray.push(fileName);
+                  // Upload data to Firestore
+                  const userFilesCollectionRef = collection(db, "users", user.email, "files"); // Path: users/{user.email}/files
 
-                      // Trigger file download after successfully storing data in Firestore
-                      // try {
-                      //   const response = await fetch(downloadURL); // Fetch the file
-                      //   const blob = await response.blob(); // Convert to Blob
+                  const fileDocRef = doc(userFilesCollectionRef, `${ivHex}`); // Document ID: dateUploaded-fileName
 
-                      //   const link = document.createElement("a");
-                      //   link.href = URL.createObjectURL(blob);
-                      //   link.download = fileName; // Set correct file name
-                      //   document.body.appendChild(link);
-                      //   link.click();
-                      //   document.body.removeChild(link);
-                      // } catch (downloadError) {
-                      //   console.error("Failed to download the encrypted file:", downloadError);
-                      // }
-                      setError('');
-                    } else {
-                      setError(data.error);
-                    }
-                    
-                    fileIndex++;
+                  await setDoc(fileDocRef, {
+                    fileUrl: downloadURL,
+                    fileName: fileName,
+                    fileType: mimeType,
+                    dateUploaded: dateUploaded,
+                    encryptedNote: encryptedNote
+                  });
+
+                  // Trigger file download after successfully storing data in Firestore
+                  // try {
+                  //   const response = await fetch(downloadURL); // Fetch the file
+                  //   const blob = await response.blob(); // Convert to Blob
+
+                  //   const link = document.createElement("a");
+                  //   link.href = URL.createObjectURL(blob);
+                  //   link.download = fileName; // Set correct file name
+                  //   document.body.appendChild(link);
+                  //   link.click();
+                  //   document.body.removeChild(link);
+                  // } catch (downloadError) {
+                  //   console.error("Failed to download the encrypted file:", downloadError);
+                  // }
+                  setError('');
+                
+                fileIndex++;
                   
               } catch (error) {
                 console.error("Error during upload or encryption. Please refresh the page:", error);
@@ -289,7 +302,7 @@ function AdminPageEncryptFile() {
 
       setLinks(linkArray);
       setEncryptionToken(encryptionTokens);
-      setUniqueFileName(uniqueFileNameArray)
+      setUniqueFileName(uniqueFileNameArray);
       } else {
         setError('User is not authenticated.');
       }
@@ -483,58 +496,55 @@ const handleGenerateKey = async () => {
                 {error && <p className="error-message">{error}</p>}
                 {encryptionToken.length > 0 && (
                   <div>
+                    <h2 className='header2'>Encryption Token</h2>
                     {encryptionToken.map((iv, index) => (
-                      <div>
-                        <h2 className='header2'>Encryption Token</h2>
-                        <div key={index}>
-                          <textarea
-                            rows="3"
-                            cols="80"
-                            value={iv}
-                            readOnly
-                            className="encrypted-links-textarea"
-                          />
-                          <button
-                            className="copy-btn"
-                            type="button"
-                            onClick={() => navigator.clipboard.writeText(iv)}
-                          >
-                            Copy to Clipboard
-                          </button>
-                        </div>
+                      <div key={index}>
+                        <textarea
+                          rows="3"
+                          cols="80"
+                          value={iv}
+                          readOnly
+                          className="encrypted-links-textarea"
+                        />
+                        <button
+                          className="copy-btn"
+                          type="button"
+                          onClick={() => navigator.clipboard.writeText(iv)}
+                        >
+                          Copy to Clipboard
+                        </button>
                       </div>
                     ))}
-                    {links.map((link, index) => (
-                      <div>
-                        <h2 className='header2'>Encrypted File Download Links</h2>
-                        <div key={index}>
-                          <textarea
-                            rows="3"
-                            cols="80"
-                            value={link}
-                            readOnly
-                            className="encrypted-links-textarea"
-                          />
-                          <button
-                            className="copy-btn"
-                            type="button"
-                            onClick={() => navigator.clipboard.writeText(link)}
-                          >
-                            Copy to Clipboard
-                          </button>
-                        </div>
-                      </div>
-                      
-                    ))}
-
-
-
-                    {/* Export to TXT button */}
-                    <button className="export-btn" type="button" onClick={exportToTxt}>
-                      Export to .txt
-                    </button>
                   </div>
                 )}
+
+                {links.length > 0 && (
+                  <div>
+                    <h2 className='header2'>Encrypted File Download Links</h2>
+                    {links.map((link, index) => (
+                      <div key={index}>
+                        <textarea
+                          rows="3"
+                          cols="80"
+                          value={link}
+                          readOnly
+                          className="encrypted-links-textarea"
+                        />
+                        <button
+                          className="copy-btn"
+                          type="button"
+                          onClick={() => navigator.clipboard.writeText(link)}
+                        >
+                          Copy to Clipboard
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button className="export-btn" type="button" onClick={exportToTxt}>
+                  Export to .txt
+                </button>
+
               </div>
               <div>
                 <div>

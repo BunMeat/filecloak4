@@ -66,6 +66,37 @@ function AdminPageEncryptText() {
       });
   };
 
+// Function to encrypt text using AES-CTR
+const encryptText = async (plaintext, keyHex) => {
+  const iv = crypto.getRandomValues(new Uint8Array(16));
+  const encoder = new TextEncoder();
+  const rawKey = new Uint8Array(
+    keyHex.match(/.{1,2}/g).map((byte) => parseInt(byte, 16))
+  );
+
+  // Import key for AES-CTR
+  const key = await crypto.subtle.importKey(
+    'raw',
+    rawKey,
+    { name: 'AES-CTR' },
+    false,
+    ['encrypt']
+  );
+
+  // Encrypt text
+  const encryptedData = await crypto.subtle.encrypt(
+    { name: 'AES-CTR', counter: iv, length: 128 },
+    key,
+    encoder.encode(plaintext)
+  );
+
+  // Convert encrypted data to Base64
+  const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedData)));
+  const ivHex = Array.from(iv).map(byte => byte.toString(16).padStart(2, '0')).join('');
+  const encryptionToken = encryptedBase64 + ivHex
+  return encryptionToken;
+};
+
   const handleEncrypt = async (event) => {
     event.preventDefault();
     
@@ -76,34 +107,19 @@ function AdminPageEncryptText() {
     setLoading(true);
     try {
       const user = auth.currentUser;
-      if (user) {
-        const idToken = await user.getIdToken(); // Get the ID token for auth
-      
-        const response = await fetch('https://filecloak4.vercel.app/api/encrypttext', {
-        // const response = await fetch('http://localhost:4000/api/encrypttext', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}` // Send Firebase auth token
-          },
-          body: JSON.stringify({ text: textToEncrypt, key: encryptionKey }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          setOutput(data.encryptedText); // Set the encrypted text in the output
-          setError('');
-        } else {
-          setError(data.error);
-        }
+      if (user) {      
+        const encryptionToken = await encryptText(textToEncrypt, encryptionKey);
+        console.log("encryptionToken: ", encryptionToken);
+        setOutput(encryptionToken); 
+        setError('');
+ 
       } else {
         setError('User is not authenticated.');
       }
     } catch (error) {
       setError('An error occurred: ' + error.message);
     } finally {
-      setLoading(false); // Stop loading when done
+      setLoading(false); 
     }
   };
 
