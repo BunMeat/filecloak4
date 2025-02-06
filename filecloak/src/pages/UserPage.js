@@ -145,11 +145,8 @@ const handleDecrypt = async (e) => {
 
       // Convert hex input to Uint8Array for key and IV
       const keyArray = hexToUint8Array(cleanedKey.trim());
-      const ivHex = tokenInput.slice(-32); // Last 32 chars = IV
-      const ciphertextHex = tokenInput.slice(0, -32); // Remaining part = Base64 ciphertext
-      // kwqVQTjB0gJg4cqwSstiiHKhXTDgRG8ViQ==64a4bebfd9f416e7868277047a00d937
-      // 535c4e544b8a4d563f6355e070f54235da0bd1c633c632876c240366df36b677
-      // uploads_admin3@gmail.com_20250206_160208.jpg-4795dv.jpeg
+      const ivHex = tokenInput.slice(-32); 
+      const ciphertextHex = tokenInput.slice(0, -32); 
       const iv = hexToUint8Array(ivHex.trim());
       // Import the AES key
       const cryptoKey = await crypto.subtle.importKey(
