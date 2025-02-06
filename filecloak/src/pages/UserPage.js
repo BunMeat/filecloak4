@@ -87,13 +87,53 @@ const nameCleaner = (encryptedFileName) => {
   }
 }
 
+const decryptText = async (encryptionToken, keyHex) => {
+  try {
+    // Extract the IV (last 32 hex characters) and the encrypted note
+    const ivHex = encryptionToken.slice(-32); // Last 32 chars = IV
+    const encryptedBase64 = encryptionToken.slice(0, -32); // Remaining part = Base64 ciphertext
+
+    // Convert key and IV from hex to Uint8Array
+    const rawKey = new Uint8Array(keyHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+    const iv = new Uint8Array(ivHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+
+    // Convert Base64 ciphertext to Uint8Array
+    const encryptedBytes = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+
+    // Import the AES key
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      rawKey,
+      { name: "AES-CTR" },
+      false,
+      ["decrypt"]
+    );
+
+    // Decrypt the text
+    const decryptedTextBytes = await crypto.subtle.decrypt(
+      {
+        name: "AES-CTR",
+        counter: iv,
+        length: 128,
+      },
+      cryptoKey,
+      encryptedBytes
+    );
+
+    // Convert decrypted bytes to string
+    return new TextDecoder().decode(decryptedTextBytes);
+  } catch (error) {
+    console.error("Error decrypting text:", error);
+    throw new Error("Failed to decrypt text. Check your key and token.");
+  }
+};  
+
 const handleDecrypt = async (e) => {
   e.preventDefault();
   setLoading(true);
   try {
     const user = auth.currentUser;
     if (user) {
-      const idToken = await user.getIdToken();
       if (files.length === 0) {
         throw new Error('No file selected for decryption.');
       }
@@ -105,7 +145,11 @@ const handleDecrypt = async (e) => {
 
       // Convert hex input to Uint8Array for key and IV
       const keyArray = hexToUint8Array(cleanedKey.trim());
-      const [ciphertext, ivHex] = tokenInput.split(':');
+      const ivHex = tokenInput.slice(-32); // Last 32 chars = IV
+      const ciphertextHex = tokenInput.slice(0, -32); // Remaining part = Base64 ciphertext
+      // kwqVQTjB0gJg4cqwSstiiHKhXTDgRG8ViQ==64a4bebfd9f416e7868277047a00d937
+      // 535c4e544b8a4d563f6355e070f54235da0bd1c633c632876c240366df36b677
+      // uploads_admin3@gmail.com_20250206_160208.jpg-4795dv.jpeg
       const iv = hexToUint8Array(ivHex.trim());
       // Import the AES key
       const cryptoKey = await crypto.subtle.importKey(
@@ -142,31 +186,19 @@ const handleDecrypt = async (e) => {
       // Release object URL after download
       URL.revokeObjectURL(url);
       
-            const response = await fetch('https://filecloak4.vercel.app/api/decrypt', {
-            // const response = await fetch('http://localhost:4000/api/decrypt', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${idToken}` // Send Firebase auth token
-                },
-                body: JSON.stringify({ encryptedText: tokenInput, key: keyInput }),
-              });
-      
-              const data = await response.json();
-      
-              if (response.ok) {
-                // Create and download the `.txt` file with the decrypted fileNote
-                const decryptedNote = data.decryptedText
-                const fileNoteBlob = new Blob([decryptedNote], { type: 'text/plain' });
-                const fileNoteUrl = URL.createObjectURL(fileNoteBlob);
-                const fileNoteLink = document.createElement('a');
-                fileNoteLink.href = fileNoteUrl;
-                fileNoteLink.download = `${cleanFileName}_note.txt`; // Name the note file
-                document.body.appendChild(fileNoteLink);
-                fileNoteLink.click();
-                document.body.removeChild(fileNoteLink);
-                URL.revokeObjectURL(fileNoteUrl);
-              }
+            
+      // Create and download the `.txt` file with the decrypted fileNote
+      const decryptedNote = await decryptText(tokenInput, keyInput);
+      const fileNoteBlob = new Blob([decryptedNote], { type: 'text/plain' });
+      const fileNoteUrl = URL.createObjectURL(fileNoteBlob);
+      const fileNoteLink = document.createElement('a');
+      fileNoteLink.href = fileNoteUrl;
+      fileNoteLink.download = `${cleanFileName}_note.txt`; // Name the note file
+      document.body.appendChild(fileNoteLink);
+      fileNoteLink.click();
+      document.body.removeChild(fileNoteLink);
+      URL.revokeObjectURL(fileNoteUrl);
+              
   
       alert('File decrypted successfully!');
     }
@@ -228,10 +260,10 @@ const handleDecrypt = async (e) => {
                   </button>
                   <br />
                 </div>
-                <h2 className='header2'>Input Encrypted File</h2>
+                <h2 className='header2'>Input An Encrypted File</h2>
                 <div className="file-input-div">
                   <div className="drop-area" id="dropArea">
-                    {!fileNames && <p>Drag and drop files or click to select</p>}
+                    {!fileNames && <p>Drag and drop file or click to select</p>}
                     <input
                       className="userfile-input"
                       type="file"
@@ -241,7 +273,7 @@ const handleDecrypt = async (e) => {
                       required
                       onChange={handleFileChange}
                     />
-                    {fileNames && <p>Files Selected: {fileNames}</p>}
+                    {fileNames && <p>File Selected: {fileNames}</p>}
                   </div>
               </div>
                 <h2 className='header2'>Input Key</h2>

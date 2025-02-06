@@ -57,45 +57,70 @@ function UserPageText() {
 
     return () => unsubscribe();})
 
-const handleDecrypt = async (e) => {
-  e.preventDefault();
-  if (!textToDecrypt || !key) {
-    setError('Please enter both text and key.');
-    return;
-  }
-  setLoading(true);
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      const idToken = await user.getIdToken(); // Get the ID token for auth
-    
-      const response = await fetch('https://filecloak4.vercel.app/api/decrypttext', {
-      // const response = await fetch('http://localhost:4000/api/decrypttext', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}` // Send Firebase auth token
+  const decryptText = async (encryptionToken, keyHex) => {
+    try {
+      // Extract the IV (last 32 hex characters) and the encrypted note
+      const ivHex = encryptionToken.slice(-32); 
+      const encryptedBase64 = encryptionToken.slice(0, -32);
+  
+      // Convert key and IV from hex to Uint8Array
+      const rawKey = new Uint8Array(keyHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+      const iv = new Uint8Array(ivHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+  
+      // Convert Base64 ciphertext to Uint8Array
+      const encryptedBytes = Uint8Array.from(atob(encryptedBase64), c => c.charCodeAt(0));
+  
+      // Import the AES key
+      const cryptoKey = await crypto.subtle.importKey(
+        "raw",
+        rawKey,
+        { name: "AES-CTR" },
+        false,
+        ["decrypt"]
+      );
+  
+      // Decrypt the text
+      const decryptedTextBytes = await crypto.subtle.decrypt(
+        {
+          name: "AES-CTR",
+          counter: iv,
+          length: 128,
         },
-        body: JSON.stringify({ encryptedText: textToDecrypt, key }),
-      });
+        cryptoKey,
+        encryptedBytes
+      );
+  
+      // Convert decrypted bytes to string
+      return new TextDecoder().decode(decryptedTextBytes);
+    } catch (error) {
+      console.error("Error decrypting text:", error);
+      throw new Error("Failed to decrypt text. Check your key and token.");
+    }
+  };  
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setOutput(data.decryptedText); // Set the encrypted text in the output
+  const handleDecrypt = async (e) => {
+    e.preventDefault();
+    if (!textToDecrypt || !key) {
+      setError('Please enter both text and key.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const decryptedNote = await decryptText(textToDecrypt, key);
+        
+        setOutput(decryptedNote);
         setError('');
       } else {
-        setError(data.error);
+        setError('User is not authenticated.');
       }
-    } else {
-      setError('User is not authenticated.');
+    } catch (error) {
+      setError('An error occurred: ' + error.message);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    setError('An error occurred: ' + error.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const logOut = async () => {
