@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore'
-import { getStorage } from 'firebase/storage';
 import FileCloak from '../FileCloak.webp';
 import './AdminPageDecryptText.css';
 import { initializeApp } from 'firebase/app';
@@ -20,7 +19,6 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp); 
-const storage = getStorage(firebaseApp)
 
 function AdminPageDecryptText() {
   const navigate = useNavigate();

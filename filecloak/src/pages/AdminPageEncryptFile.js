@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAuth, signOut } from 'firebase/auth'; // Import Firebase auth functions
+import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, collection } from 'firebase/firestore'
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import FileCloak from '../FileCloak.webp';
