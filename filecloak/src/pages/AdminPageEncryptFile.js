@@ -265,7 +265,7 @@ const encryptText = async (plaintext, keyHex, iv) => {
                   // Upload data to Firestore
                   const userFilesCollectionRef = collection(db, "users", user.email, "files"); // Path: users/{user.email}/files
 
-                  const fileDocRef = doc(userFilesCollectionRef, `${ivHex}`); // Document ID: dateUploaded-fileName
+                  const fileDocRef = doc(userFilesCollectionRef, `${dateUploaded}`); // Document ID: dateUploaded-fileName
 
                   await setDoc(fileDocRef, {
                     fileUrl: downloadURL,
